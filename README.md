@@ -58,7 +58,13 @@ Pantry Pal is a user-centric recipe discovery app designed to minimize food wast
   - Engaging features (e.g., shake-to-discover) and intuitive design drive retention.
 
 
-## 7. NExt Step
-  - Finalize UI/UX prototypes.
-  - Develop core features and conduct cross-device testing.
-  - Launch beta version with user feedback integration.
+## 8. Initial Sketches
+  - Recipe Search and Detail Page:
+  ![Recipe_page](images/recipe_search-detail.jpg)
+
+  - Cook Books and Grocery List Page:
+  ![cook_book](images/cook_book-grocery_list.jpg)
+
+  - User Profile Page:
+  ![User_Profile](images/profile.jpg)
+
