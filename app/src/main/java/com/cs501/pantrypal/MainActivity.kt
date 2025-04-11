@@ -1,5 +1,6 @@
 package com.cs501.pantrypal
 
+import android.app.Application
 import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -15,6 +16,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.cs501.pantrypal.ui.theme.PantryPalTheme
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavType
 import androidx.navigation.compose.*
 import com.cs501.pantrypal.data.model.Recipe
@@ -38,7 +40,8 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun AppNavHost() {
-    val viewModel = remember { RecipeViewModel() }
+    val application = LocalContext.current.applicationContext as Application
+    val viewModel = remember { RecipeViewModel(application) }
     val navController = rememberNavController()
 
     NavHost(navController, startDestination = "search") {
@@ -50,22 +53,5 @@ fun AppNavHost() {
                 RecipeDetailScreen(it, navController)
             } ?: Text("No recipe selected")
         }
-    }
-}
-
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    PantryPalTheme {
-        Greeting("Android")
     }
 }
