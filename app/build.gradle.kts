@@ -55,6 +55,8 @@ dependencies {
     implementation (libs.androidx.room.ktx)
     kapt(libs.androidx.room.compiler)
     implementation (libs.androidx.lifecycle.viewmodel.compose.v270)
+    implementation (libs.androidx.datastore.preferences)
+    implementation (libs.androidx.datastore.core)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

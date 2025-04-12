@@ -7,7 +7,7 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 
 @Database(
-    entities = [UserIngredients::class, SavedRecipe::class],
+    entities = [UserIngredients::class, SavedRecipe::class, User::class],
     version = 1,
     exportSchema = false
 )
@@ -15,6 +15,7 @@ import androidx.room.TypeConverters
 abstract class AppDatabase : RoomDatabase() {
     abstract fun userIngredientsDao(): UserIngredientsDao
     abstract fun savedRecipeDao(): SavedRecipeDao
+    abstract fun userDao(): UserDao
 
     companion object {
         @Volatile
