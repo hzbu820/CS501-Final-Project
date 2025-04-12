@@ -40,7 +40,8 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun AppNavHost() {
-    val viewModel = remember { RecipeViewModel() }
+    val application = LocalContext.current.applicationContext as Application
+    val viewModel = remember { RecipeViewModel(application) }
     val navController = rememberNavController()
 
     Scaffold(
