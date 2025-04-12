@@ -20,8 +20,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavType
 import androidx.navigation.compose.*
 import com.cs501.pantrypal.data.model.Recipe
-import com.cs501.pantrypal.screen.RecipeDetailScreen
-import com.cs501.pantrypal.screen.RecipeSearchScreen
+import com.cs501.pantrypal.navigation.BottomNavigationBar
+import com.cs501.pantrypal.screen.*
 import com.cs501.pantrypal.viewmodel.RecipeViewModel
 import java.net.URLDecoder
 
@@ -44,14 +44,32 @@ fun AppNavHost() {
     val viewModel = remember { RecipeViewModel(application) }
     val navController = rememberNavController()
 
-    NavHost(navController, startDestination = "search") {
-        composable("search") {
-            RecipeSearchScreen(viewModel, navController)
-        }
-        composable("detail") { backStack ->
-            viewModel.selectedRecipe?.let {
-                RecipeDetailScreen(it, navController)
-            } ?: Text("No recipe selected")
+    Scaffold(
+        bottomBar = { BottomNavigationBar(navController) }
+    ) { paddingValues ->
+        NavHost(
+            navController,
+            startDestination = "discover",
+            modifier = Modifier.padding(paddingValues)
+        ) {
+            composable("discover") {
+                RecipeSearchScreen(viewModel, navController)
+            }
+            composable("cookbook") {
+                CookBookScreen()
+            }
+            composable("grocerylist") {
+                GroceryListScreen()
+            }
+            composable("profile") {
+                ProfileScreen()
+            }
+
+            composable("detail") { backStack ->
+                viewModel.selectedRecipe?.let {
+                    RecipeDetailScreen(it, navController)
+                } ?: Text("No recipe selected")
+            }
         }
     }
 }
