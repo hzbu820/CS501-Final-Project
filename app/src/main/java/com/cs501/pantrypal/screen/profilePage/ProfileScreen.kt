@@ -49,7 +49,7 @@ fun ProfileScreen(
     userIngredientsViewModel: UserIngredientsViewModel
 ) {
     val currentUser by userViewModel.currentUser.collectAsState()
-    val ingredients by userIngredientsViewModel.ingredients.collectAsState()
+    val ingredients by userIngredientsViewModel.allIngredients.collectAsState()
     val coroutineScope = rememberCoroutineScope()
 
     // State for profile image URI
@@ -339,7 +339,7 @@ private fun MyPantrySection(
             if (ingredients.isEmpty()) {
                 EmptyPantryMessage()
             } else {
-                IngredientsRow(ingredients = ingredients)
+                IngredientsRow(ingredients)
             }
         }
     }

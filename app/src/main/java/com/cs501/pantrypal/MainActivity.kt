@@ -18,12 +18,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.compose.*
 import com.cs501.pantrypal.navigation.BottomNavigationBar
 import com.cs501.pantrypal.screen.*
+import com.cs501.pantrypal.screen.profilePage.AddIngredientScreen
 import com.cs501.pantrypal.screen.profilePage.LoginScreen
 import com.cs501.pantrypal.screen.profilePage.ProfileScreen
 import com.cs501.pantrypal.screen.profilePage.RegisterScreen
 import com.cs501.pantrypal.viewmodel.RecipeViewModel
 import com.cs501.pantrypal.viewmodel.UserIngredientsViewModel
-import com.cs501.pantrypal.viewmodel.UserProfileViewModel
 import com.cs501.pantrypal.viewmodel.UserViewModel
 
 class MainActivity : ComponentActivity() {
@@ -42,7 +42,6 @@ class MainActivity : ComponentActivity() {
 fun AppNavHost() {
     val application = LocalContext.current.applicationContext as Application
     val recipeViewModel = remember { RecipeViewModel(application) }
-    val userProfileViewModel = remember { UserProfileViewModel(application) }
     val userViewModel = remember { UserViewModel(application) }
     val userIngredientsViewModel = remember { UserIngredientsViewModel(application) }
     val navController = rememberNavController()
@@ -80,6 +79,9 @@ fun AppNavHost() {
                 recipeViewModel.selectedRecipe?.let {
                     RecipeDetailScreen(it, navController)
                 } ?: Text("No recipe selected")
+            }
+            composable("add_ingredient") {
+                AddIngredientScreen(userIngredientsViewModel, navController, snackbarHostState)
             }
         }
     }
