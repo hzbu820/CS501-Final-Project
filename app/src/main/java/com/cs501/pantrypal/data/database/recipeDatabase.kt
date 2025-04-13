@@ -38,10 +38,9 @@ data class SavedRecipe(
     val url: String,
     val ingredientLines: List<String>,
     val calories: Double,
-    val totalWeight: Double,
-    val totalTime: Double,
     val isFavorite: Boolean = false,
-    val dateAdded: Long = System.currentTimeMillis()
+    val dateAdded: Long = System.currentTimeMillis(),
+    val userId: Int = -1
 )
 
 class StringListConverter {
@@ -61,6 +60,9 @@ interface SavedRecipeDao {
     @Query("SELECT * FROM saved_recipes ORDER BY dateAdded DESC")
     fun getAllRecipes(): Flow<List<SavedRecipe>>
     
+    @Query("SELECT * FROM saved_recipes WHERE userId = :userId ORDER BY dateAdded DESC")
+    fun getRecipesByUserId(userId: Int): Flow<List<SavedRecipe>>
+    
     @Query("SELECT * FROM saved_recipes WHERE id = :id")
     suspend fun getRecipeById(id: Int): SavedRecipe?
     
@@ -72,10 +74,16 @@ interface SavedRecipeDao {
     
     @Delete
     suspend fun deleteRecipe(recipe: SavedRecipe)
-    
+
     @Query("SELECT * FROM saved_recipes WHERE label LIKE '%' || :searchQuery || '%'")
     fun searchRecipes(searchQuery: String): Flow<List<SavedRecipe>>
     
+    @Query("SELECT * FROM saved_recipes WHERE label LIKE '%' || :searchQuery || '%' AND userId = :userId")
+    fun searchRecipesByUser(searchQuery: String, userId: Int): Flow<List<SavedRecipe>>
+    
     @Query("SELECT * FROM saved_recipes WHERE isFavorite = 1")
     fun getFavoriteRecipes(): Flow<List<SavedRecipe>>
+    
+    @Query("SELECT * FROM saved_recipes WHERE isFavorite = 1 AND userId = :userId")
+    fun getFavoriteRecipesByUser(userId: Int): Flow<List<SavedRecipe>>
 }
