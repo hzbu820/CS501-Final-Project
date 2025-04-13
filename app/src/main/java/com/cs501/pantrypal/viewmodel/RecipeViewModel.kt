@@ -19,6 +19,8 @@ import kotlinx.coroutines.launch
 
 class RecipeViewModel(application: Application) : BaseViewModel(application) {
     private val repository: RecipeRepository
+    private val userRepository: UserRepository
+
     var recipes by mutableStateOf<List<Recipe>>(emptyList())
     var isLoading by mutableStateOf(false)
     var selectedRecipe: Recipe? by mutableStateOf(null)
@@ -50,6 +52,9 @@ class RecipeViewModel(application: Application) : BaseViewModel(application) {
         }
     }
     
+    /**
+     * Search for recipes from the API
+     */
     fun searchRecipes(query: String) {
         Log.d("PantryPal", "Start searching for $query")
         viewModelScope.launch {
@@ -61,6 +66,37 @@ class RecipeViewModel(application: Application) : BaseViewModel(application) {
                 Log.e("PantryPal", "Error: ${e.message}", e)
             } finally {
                 isLoading = false
+            }
+        }
+    }
+    
+    /**
+     * Save a recipe to the database
+     */
+    fun saveRecipe(recipe: Recipe, isFavorite: Boolean = false) {
+        if (!isUserLoggedIn()) {
+            Log.w("PantryPal", "Cannot save recipe: No user logged in")
+            return
+        }
+        
+        viewModelScope.launch {
+            try {
+                // Transform the Recipe object to SavedRecipe
+                val savedRecipe = SavedRecipe(
+                    label = recipe.label,
+                    image = recipe.image,
+                    url = recipe.uri ?: "",
+                    ingredientLines = recipe.ingredientLines,
+                    calories = 0.0,
+                    isFavorite = isFavorite,
+                    userId = getCurrentUserId()
+                )
+                repository.insertRecipe(savedRecipe)
+                Log.d("PantryPal", "Recipe saved: ${recipe.label}")
+
+                loadSavedRecipes()
+            } catch (e: Exception) {
+                Log.e("PantryPal", "Error saving recipe: ${e.message}", e)
             }
         }
     }

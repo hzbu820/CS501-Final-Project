@@ -8,36 +8,48 @@ import kotlinx.coroutines.flow.Flow
 
 class RecipeRepository(private val savedRecipeDao: SavedRecipeDao) {
     val allRecipes: Flow<List<SavedRecipe>> = savedRecipeDao.getAllRecipes()
-    val favoriteRecipes: Flow<List<SavedRecipe>> = savedRecipeDao.getFavoriteRecipes()
 
-    suspend fun getRecipeById(id: Int): SavedRecipe? {
-        return savedRecipeDao.getRecipeById(id)
+    /**
+     * Get all saved recipes by user ID
+     */
+    fun getAllRecipesByUserId(userId: Int): Flow<List<SavedRecipe>> {
+        return savedRecipeDao.getRecipesByUserId(userId)
+    }
+    
+    /**
+     * Get all favorite recipes by user ID
+     */
+    fun getFavoriteRecipesByUser(userId: Int): Flow<List<SavedRecipe>> {
+        return savedRecipeDao.getFavoriteRecipesByUser(userId)
     }
 
+    /**
+     * Insert a new recipe to the database
+     */
     suspend fun insertRecipe(recipe: SavedRecipe): Long {
         return savedRecipeDao.insertRecipe(recipe)
     }
 
-    suspend fun updateRecipe(recipe: SavedRecipe) {
-        savedRecipeDao.updateRecipe(recipe)
-    }
-
+    /**
+     * Remove a recipe from the database
+     */
     suspend fun deleteRecipe(recipe: SavedRecipe) {
         savedRecipeDao.deleteRecipe(recipe)
     }
-
-    fun searchRecipes(query: String): Flow<List<SavedRecipe>> {
-        return savedRecipeDao.searchRecipes(query)
+    
+    /**
+     * Search user's saved recipes
+     */
+    fun searchRecipesByUser(query: String, userId: Int): Flow<List<SavedRecipe>> {
+        return savedRecipeDao.searchRecipesByUser(query, userId)
     }
-
+    
+    /**
+     * Get a recipe from the Api
+     */
     suspend fun searchRecipesFromApi(query: String): List<Recipe> {
         val response = ApiClient.retrofit.searchRecipes(ingredients = query)
         return response.hits.map { it.recipe }
     }
 
-    fun displayFavoriteRecipes(): Flow<List<SavedRecipe>> {
-        return favoriteRecipes
-    }
-
-    //TODO: Can add functions to format recipe data here
 }

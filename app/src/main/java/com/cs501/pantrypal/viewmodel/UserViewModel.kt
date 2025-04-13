@@ -120,4 +120,14 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
             _isLoggedIn.value = false
         }
     }
+    
+    /**
+     * Update user profile information
+     */
+    fun updateUserProfile(user: User) {
+        viewModelScope.launch {
+            repository.updateUser(user)
+            _currentUser.value = user
+        }
+    }
 }
