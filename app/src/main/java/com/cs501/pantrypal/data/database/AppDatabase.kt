@@ -8,7 +8,7 @@ import androidx.room.TypeConverters
 
 @Database(
     entities = [UserIngredients::class, SavedRecipe::class, User::class],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 @TypeConverters(StringListConverter::class, IngredientListConverter::class)
@@ -28,7 +28,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "pantry_pal_database"
                 )
-                // .fallbackToDestructiveMigration() //Add this if major version changes to clear the database
+                    .fallbackToDestructiveMigration() //Add this if major version changes to clear the database
                 .build()
                 INSTANCE = instance
                 instance

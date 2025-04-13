@@ -57,25 +57,4 @@ fun RecipeDetailScreen(recipe: Recipe, navController: NavController) {
 }
 
 
-//@Composable
-//fun RecipeDetailScreen(recipe: Recipe) {
-//    LazyColumn(modifier = Modifier.padding(16.dp)) {
-//        item {
-//            Text(recipe.label, style = MaterialTheme.typography.headlineMedium)
-//            AsyncImage(
-//                model = recipe.image,
-//                contentDescription = null,
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//                    .height(200.dp)
-//            )
-//            Spacer(modifier = Modifier.height(8.dp))
-//            Text("Description", fontWeight = FontWeight.Bold)
-//            Text("Ingredients:")
-//        }
-//
-//        items(recipe.ingredientLines) { line ->
-//            Text("• $line")
-//        }
-//    }
-//}
+

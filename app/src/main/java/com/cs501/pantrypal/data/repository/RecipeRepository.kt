@@ -36,7 +36,12 @@ class RecipeRepository(private val savedRecipeDao: SavedRecipeDao) {
     suspend fun deleteRecipe(recipe: SavedRecipe) {
         savedRecipeDao.deleteRecipe(recipe)
     }
-    
+
+    suspend fun deleteRecipesByCookbook(cookbook: String) {
+        savedRecipeDao.deleteByCookbook(cookbook)
+    }
+
+
     /**
      * Search user's saved recipes
      */
@@ -50,6 +55,17 @@ class RecipeRepository(private val savedRecipeDao: SavedRecipeDao) {
     suspend fun searchRecipesFromApi(query: String): List<Recipe> {
         val response = ApiClient.retrofit.searchRecipes(ingredients = query)
         return response.hits.map { it.recipe }
+    }
+
+    /**
+     * Get recipes by cookbook name
+     */
+    fun getRecipesByCookbook(cookbookName: String): Flow<List<SavedRecipe>> {
+        return savedRecipeDao.getRecipesByCookbook(cookbookName)
+    }
+
+    fun getAllCookbookNames(): Flow<List<String>> {
+        return savedRecipeDao.getAllCookbookNames()
     }
 
 }

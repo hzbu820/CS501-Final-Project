@@ -40,7 +40,8 @@ data class SavedRecipe(
     val calories: Double,
     val isFavorite: Boolean = false,
     val dateAdded: Long = System.currentTimeMillis(),
-    val userId: Int = -1
+    val userId: Int = -1,
+    val cookbookName: String = "default"
 )
 
 class StringListConverter {
@@ -86,4 +87,14 @@ interface SavedRecipeDao {
     
     @Query("SELECT * FROM saved_recipes WHERE isFavorite = 1 AND userId = :userId")
     fun getFavoriteRecipesByUser(userId: Int): Flow<List<SavedRecipe>>
+
+    @Query("SELECT * FROM saved_recipes WHERE cookbookName = :cookbookName")
+    fun getRecipesByCookbook(cookbookName: String): Flow<List<SavedRecipe>>
+
+    @Query("SELECT DISTINCT cookbookName FROM saved_recipes")
+    fun getAllCookbookNames(): Flow<List<String>>
+
+    @Query("DELETE FROM saved_recipes WHERE cookbookName = :cookbook")
+    suspend fun deleteByCookbook(cookbook: String)
+
 }

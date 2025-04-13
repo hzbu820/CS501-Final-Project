@@ -28,6 +28,9 @@ class RecipeViewModel(application: Application) : BaseViewModel(application) {
     private val _savedRecipes = MutableStateFlow<List<SavedRecipe>>(emptyList())
     val savedRecipes: StateFlow<List<SavedRecipe>> = _savedRecipes.asStateFlow()
 
+    private val _cookbooks = MutableStateFlow<List<String>>(emptyList())
+    val cookbooks: StateFlow<List<String>> = _cookbooks
+
     init {
         val database = AppDatabase.getDatabase(application)
         repository = RecipeRepository(database.savedRecipeDao())
@@ -100,4 +103,71 @@ class RecipeViewModel(application: Application) : BaseViewModel(application) {
             }
         }
     }
+
+    fun deleteSavedRecipe(recipe: SavedRecipe) {
+        viewModelScope.launch {
+            repository.deleteRecipe(recipe)
+            loadRecipesByCookbook(recipe.cookbookName)
+        }
+    }
+
+    fun selectSavedRecipe(recipe: SavedRecipe) {
+        //selectedRecipe = recipe
+    }
+
+
+    fun loadCookbooks() {
+        viewModelScope.launch {
+            repository.getAllCookbookNames().collect {
+                _cookbooks.value = it
+            }
+        }
+    }
+
+    fun loadRecipesByCookbook(cookbook: String) {
+        viewModelScope.launch {
+            repository.getRecipesByCookbook(cookbook).collect {
+                _savedRecipes.value = it
+            }
+        }
+    }
+
+    fun createCookbook(name: String) {
+        viewModelScope.launch {
+            val userId = getCurrentUserId()
+            if (userId <= 0) {
+                Log.w("PantryPal", "Cannot create cookbook: No user logged in")
+                return@launch
+            }
+
+            // 新建一个空的 SavedRecipe 作为 cookbook 占位（或根据需求定义结构）
+            val placeholder = SavedRecipe(
+                label = "",  // 空标题，表示只是一个容器
+                image = "",
+                url = "",
+                ingredientLines = listOf(),
+                calories = 0.0,
+                isFavorite = false,
+                userId = userId,
+                cookbookName = name
+            )
+
+            repository.insertRecipe(placeholder)
+            loadCookbooks()
+        }
+    }
+
+    fun getRecipeCountInCookbook(cookbook: String): Int {
+        return _savedRecipes.value.count { it.cookbookName == cookbook }
+    }
+
+    fun deleteCookbook(cookbook: String) {
+        viewModelScope.launch {
+            repository.deleteRecipesByCookbook(cookbook)
+            loadCookbooks()
+        }
+    }
+
+
+
 }

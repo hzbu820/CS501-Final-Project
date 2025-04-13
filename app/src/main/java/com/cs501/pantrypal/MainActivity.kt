@@ -23,7 +23,7 @@ import com.cs501.pantrypal.screen.profilePage.ProfileScreen
 import com.cs501.pantrypal.screen.profilePage.RegisterScreen
 import com.cs501.pantrypal.viewmodel.RecipeViewModel
 import com.cs501.pantrypal.viewmodel.UserIngredientsViewModel
-import com.cs501.pantrypal.viewmodel.UserProfileViewModel
+//import com.cs501.pantrypal.viewmodel.UserProfileViewModel
 import com.cs501.pantrypal.viewmodel.UserViewModel
 
 class MainActivity : ComponentActivity() {
@@ -42,7 +42,7 @@ class MainActivity : ComponentActivity() {
 fun AppNavHost() {
     val application = LocalContext.current.applicationContext as Application
     val recipeViewModel = remember { RecipeViewModel(application) }
-    val userProfileViewModel = remember { UserProfileViewModel(application) }
+    //val userProfileViewModel = remember { UserProfileViewModel(application) }
     val userViewModel = remember { UserViewModel(application) }
     val userIngredientsViewModel = remember { UserIngredientsViewModel(application) }
     val navController = rememberNavController()
@@ -68,7 +68,7 @@ fun AppNavHost() {
                 RecipeSearchScreen(recipeViewModel, navController)
             }
             composable("cookbook") {
-                CookBookScreen()
+                CookBookScreen(navController, recipeViewModel)
             }
             composable("grocerylist") {
                 GroceryListScreen()
