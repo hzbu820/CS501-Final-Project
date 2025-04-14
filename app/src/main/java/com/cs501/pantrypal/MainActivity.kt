@@ -6,6 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -24,6 +25,7 @@ import com.cs501.pantrypal.screen.profilePage.AddIngredientScreen
 import com.cs501.pantrypal.screen.profilePage.LoginScreen
 import com.cs501.pantrypal.screen.profilePage.ProfileScreen
 import com.cs501.pantrypal.screen.profilePage.RegisterScreen
+import com.cs501.pantrypal.ui.theme.Typography
 import com.cs501.pantrypal.viewmodel.RecipeViewModel
 import com.cs501.pantrypal.viewmodel.UserIngredientsViewModel
 //import com.cs501.pantrypal.viewmodel.UserProfileViewModel
@@ -83,7 +85,7 @@ fun AppNavHost() {
             composable("detail") { backStack ->
                 recipeViewModel.selectedRecipe?.let {
                     RecipeDetailScreen(recipeViewModel, navController)
-                } ?: Text("No recipe selected")
+                } ?: Text("No recipe selected", style = Typography.displayMedium)
             }
             composable(
                 route = "cookbook_detail/{cookbookName}",

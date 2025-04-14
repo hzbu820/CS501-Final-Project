@@ -14,6 +14,8 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.cs501.pantrypal.ui.theme.InfoColor
+import com.cs501.pantrypal.ui.theme.Typography
 import com.cs501.pantrypal.viewmodel.UserViewModel
 import kotlinx.coroutines.launch
 
@@ -115,8 +117,7 @@ fun RegisterScreen(userViewModel: UserViewModel, navController: NavController, s
         ) {
             Text(
                 text = "Create an New Account",
-                fontSize = 24.sp,
-                style = MaterialTheme.typography.headlineMedium,
+                style = Typography.displayMedium,
                 modifier = Modifier.padding(bottom = 32.dp)
             )
 
@@ -205,12 +206,13 @@ fun RegisterScreen(userViewModel: UserViewModel, navController: NavController, s
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 16.dp),
-                enabled = !isLoading
+                enabled = !isLoading,
+                colors = ButtonDefaults.buttonColors(InfoColor)
             ) {
                 if (isLoading) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(24.dp),
-                        color = MaterialTheme.colorScheme.onPrimary
+                        color = InfoColor
                     )
                 } else {
                     Text("Register")
@@ -219,7 +221,8 @@ fun RegisterScreen(userViewModel: UserViewModel, navController: NavController, s
 
             TextButton(
                 onClick = { navController.navigate("login") },
-                modifier = Modifier.padding(vertical = 8.dp)
+                modifier = Modifier.padding(vertical = 8.dp),
+                colors = ButtonDefaults.textButtonColors(contentColor = InfoColor)
             ) {
                 Text("Already have an account? Login")
             }

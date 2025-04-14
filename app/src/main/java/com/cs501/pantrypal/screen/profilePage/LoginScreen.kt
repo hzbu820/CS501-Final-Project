@@ -14,6 +14,9 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.cs501.pantrypal.ui.theme.ErrorColor
+import com.cs501.pantrypal.ui.theme.InfoColor
+import com.cs501.pantrypal.ui.theme.Typography
 import com.cs501.pantrypal.viewmodel.UserViewModel
 import kotlinx.coroutines.launch
 
@@ -94,8 +97,7 @@ fun LoginScreen(userViewModel: UserViewModel, navController: NavController, snac
     ) {
         Text(
             text = "Welcome to PantryPal",
-            fontSize = 24.sp,
-            style = MaterialTheme.typography.headlineMedium,
+            style = Typography.displayMedium,
             modifier = Modifier.padding(bottom = 32.dp)
         )
         
@@ -125,7 +127,7 @@ fun LoginScreen(userViewModel: UserViewModel, navController: NavController, snac
         if (errorMessage.isNotEmpty()) {
             Text(
                 text = errorMessage,
-                color = MaterialTheme.colorScheme.error,
+                color = ErrorColor,
                 modifier = Modifier.padding(vertical = 8.dp)
             )
         }
@@ -139,7 +141,8 @@ fun LoginScreen(userViewModel: UserViewModel, navController: NavController, snac
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 16.dp),
-            enabled = !isLoading
+            enabled = !isLoading,
+            colors = ButtonDefaults.buttonColors(InfoColor)
         ) {
             if (isLoading) {
                 CircularProgressIndicator(
@@ -153,9 +156,10 @@ fun LoginScreen(userViewModel: UserViewModel, navController: NavController, snac
         
         TextButton(
             onClick = { navController.navigate("register") },
-            modifier = Modifier.padding(vertical = 8.dp)
+            modifier = Modifier.padding(vertical = 8.dp),
+            colors = ButtonDefaults.textButtonColors(contentColor = InfoColor)
         ) {
-            Text("Create an account")
+            Text("Do not have an account? Create One")
         }
     }
     }

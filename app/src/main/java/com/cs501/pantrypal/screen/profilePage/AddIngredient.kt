@@ -21,6 +21,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.cs501.pantrypal.data.database.UserIngredients
+import com.cs501.pantrypal.ui.theme.InfoColor
 import com.cs501.pantrypal.util.Constants
 import com.cs501.pantrypal.viewmodel.UserIngredientsViewModel
 import kotlinx.coroutines.CoroutineScope
@@ -230,7 +231,8 @@ fun AddIngredientScreen(
             // Submit button
             Button(
                 onClick = ::validateAndSubmit,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(InfoColor)
             ) {
                 Text(if (formState.isEditing) "Update Ingredient" else "Add Ingredient")
             }
@@ -265,7 +267,8 @@ fun IngredientNameInput(
             trailingIcon = {
                 Icon(
                     imageVector = Icons.Default.Search,
-                    contentDescription = "Search Ingredient"
+                    contentDescription = "Search Ingredient",
+                    tint = InfoColor
                 )
             }
         )

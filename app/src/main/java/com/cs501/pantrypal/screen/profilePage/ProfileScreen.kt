@@ -6,7 +6,6 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
@@ -16,7 +15,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -28,17 +27,20 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.cs501.pantrypal.R
 import com.cs501.pantrypal.data.database.User
 import com.cs501.pantrypal.data.database.UserIngredients
+import com.cs501.pantrypal.ui.theme.ErrorColor
+import com.cs501.pantrypal.ui.theme.*
 import com.cs501.pantrypal.viewmodel.UserIngredientsViewModel
 import com.cs501.pantrypal.viewmodel.UserViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
 import kotlinx.coroutines.launch
+import com.cs501.pantrypal.ui.theme.Typography
+import java.util.Locale
 
 @SuppressLint("SimpleDateFormat")
 @Composable
@@ -134,8 +136,7 @@ private fun ProfileTopBar(
     ) {
         Text(
             text = "Profile",
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Bold,
+            style = Typography.displayLarge,
             modifier = Modifier.padding(bottom = 8.dp)
         )
 
@@ -144,7 +145,7 @@ private fun ProfileTopBar(
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ExitToApp,
                     contentDescription = "Logout",
-                    tint = MaterialTheme.colorScheme.error
+                    tint = ErrorColor
                 )
             }
         }
@@ -191,8 +192,7 @@ private fun UserInfoSection(
             modifier = Modifier
                 .size(100.dp)
                 .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.surfaceVariant)
-                .border(2.dp, MaterialTheme.colorScheme.primary, CircleShape)
+                .background(BackgroundLight)
                 .clickable(onClick = onImageClick),
             contentAlignment = Alignment.Center
         ) {
@@ -240,20 +240,17 @@ private fun UserInfoSection(
         ) {
             Text(
                 text = user.username,
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold
+                style = Typography.headlineLarge
             )
 
             Text(
                 text = if (user.email.isNotBlank()) user.email else "No email provided",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                style = Typography.bodyMedium
             )
 
             Text(
-                text = "Join PantryPal Since: ${SimpleDateFormat("yyyy-MM-dd").format(Date(user.createdAt))}",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                text = "Join PantryPal Since: ${SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(Date(user.createdAt))}",
+                style = Typography.bodySmall,
             )
         }
 
@@ -261,7 +258,7 @@ private fun UserInfoSection(
             Icon(
                 painter = painterResource(id = R.drawable.ic_edit),
                 contentDescription = "Edit Profile",
-                tint = MaterialTheme.colorScheme.primary
+                tint = InfoColor
             )
         }
     }
@@ -276,18 +273,20 @@ private fun EditOptionsCard() {
         shape = RoundedCornerShape(8.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text("Edit Profile Options", style = MaterialTheme.typography.titleMedium)
+            Text("Edit Profile Options", style = Typography.titleMedium)
             Spacer(modifier = Modifier.height(8.dp))
             Button(
                 onClick = { /* TODO: Implement change password */ },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(containerColor = InfoColor)
             ) {
                 Text("Change Password")
             }
             Spacer(modifier = Modifier.size(8.dp))
             Button(
                 onClick = { /* TODO: Implement change email */ },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(containerColor = InfoColor)
             ) {
                 Text("Change Email")
             }
@@ -295,9 +294,9 @@ private fun EditOptionsCard() {
             Button(
                 onClick = { /* TODO: Implement delete account */ },
                 modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                colors = ButtonDefaults.buttonColors(containerColor = ErrorColor)
             ) {
-                Text("Delete Account", color = Color.White)
+                Text("Delete Account")
             }
             Spacer(modifier = Modifier.height(8.dp))
         }
@@ -322,14 +321,14 @@ private fun MyPantrySection(
             ) {
                 Text(
                     text = "My Pantry",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold
+                    style = Typography.titleLarge
                 )
 
                 IconButton(onClick = onAddIngredient) {
                     Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = "Add Ingredient"
+                        imageVector = Icons.Default.AddCircle,
+                        contentDescription = "Add Ingredient",
+                        tint = InfoColor,
                     )
                 }
             }
@@ -355,8 +354,7 @@ private fun EmptyPantryMessage() {
     ) {
         Text(
             text = "No ingredients in your pantry yet",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            style = Typography.titleSmall
         )
     }
 }
@@ -391,27 +389,21 @@ private fun NotLoggedInContent(onLoginClick: () -> Unit) {
 
             Text(
                 text = "You are not logged in",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
+                style = Typography.titleMedium
             )
 
             Text(
                 text = "Please login to view your profile",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                style = Typography.bodyMedium
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(
                 onClick = onLoginClick,
-                modifier = Modifier.width(200.dp)
+                modifier = Modifier.width(200.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = InfoColor)
             ) {
-                Icon(
-                    imageVector = Icons.Default.AccountCircle,
-                    contentDescription = "Login",
-                    modifier = Modifier.padding(end = 8.dp)
-                )
                 Text("Login")
             }
         }
@@ -430,13 +422,14 @@ fun IngredientItem(ingredient: UserIngredients) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // Ingredient Image
+            //TODO: Replace with actual image loading logic
             Image(
                 painter = painterResource(id = R.drawable.default_ingredient_image),
                 contentDescription = ingredient.name,
                 modifier = Modifier
                     .size(80.dp)
                     .clip(RoundedCornerShape(8.dp))
-                    .background(Color(0xFFEEFFEE))
+                    .background(BackgroundLight)
                     .padding(8.dp)
             )
             
@@ -445,16 +438,14 @@ fun IngredientItem(ingredient: UserIngredients) {
             // Ingredient Name
             Text(
                 text = ingredient.name,
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.Bold,
+                style = Typography.titleSmall,
                 maxLines = 1
             )
             
             // Quantity and Unit
             Text(
                 text = "${ingredient.quantity} ${ingredient.unit}",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = Typography.bodySmall,
                 maxLines = 1
             )
         }
