@@ -1,7 +1,7 @@
 package com.cs501.pantrypal.screen
 
 
-import android.net.Uri
+
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -20,6 +20,7 @@ import com.cs501.pantrypal.data.model.Recipe
 @Composable
 fun RecipeSearchScreen(viewModel: RecipeViewModel, navController: NavController) {
     var input by remember { mutableStateOf("") }
+
 
     Column(modifier = Modifier.padding(16.dp)) {
         Text("Enter up to 5 ingredients", fontSize = 20.sp)
@@ -53,6 +54,7 @@ fun RecipeSearchScreen(viewModel: RecipeViewModel, navController: NavController)
         } else {
             LazyColumn {
                 items(viewModel.recipes) { recipe ->
+                    val isSaved = viewModel.isRecipeSaved(recipe)
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -66,6 +68,17 @@ fun RecipeSearchScreen(viewModel: RecipeViewModel, navController: NavController)
                         Column {
                             Text(recipe.label, fontWeight = FontWeight.Bold)
                             AsyncImage(model = recipe.image, contentDescription = null)
+                            Row {
+                                TextButton(onClick = {
+                                    if (isSaved) {
+                                        viewModel.deleteRecipeByUrl(recipe.uri ?: "")
+                                    } else {
+                                        viewModel.saveRecipeToCookbook(recipe)
+                                    }
+                                }) {
+                                    Text(if (isSaved) "Remove" else "Save")
+                                }
+                            }
                         }
                     }
                 }
