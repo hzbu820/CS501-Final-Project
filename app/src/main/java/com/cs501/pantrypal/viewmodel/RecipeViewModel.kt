@@ -2,6 +2,7 @@ package com.cs501.pantrypal.viewmodel
 
 import android.app.Application
 import android.util.Log
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -30,6 +31,9 @@ class RecipeViewModel(application: Application) : BaseViewModel(application) {
 
     private val _cookbooks = MutableStateFlow<List<String>>(emptyList())
     val cookbooks: StateFlow<List<String>> = _cookbooks
+
+    private val _cookbookRecipeCounts = MutableStateFlow<Map<String, Int>>(emptyMap())
+    val cookbookRecipeCounts: StateFlow<Map<String, Int>> = _cookbookRecipeCounts
 
     init {
         val database = AppDatabase.getDatabase(application)
@@ -112,17 +116,21 @@ class RecipeViewModel(application: Application) : BaseViewModel(application) {
     }
 
     fun selectSavedRecipe(recipe: SavedRecipe) {
-        //selectedRecipe = recipe
+        selectedRecipe =recipe.toRecipe()
     }
+
 
 
     fun loadCookbooks() {
         viewModelScope.launch {
-            repository.getAllCookbookNames().collect {
-                _cookbooks.value = it
+            repository.getAllRecipesByUserId(getCurrentUserId()).collect { recipes ->
+                _savedRecipes.value = recipes  // 更新整体数据
+                _cookbooks.value = recipes.map { it.cookbookName }.distinct()
+                _cookbookRecipeCounts.value = recipes.groupingBy { it.cookbookName }.eachCount()
             }
         }
     }
+
 
     fun loadRecipesByCookbook(cookbook: String) {
         viewModelScope.launch {
@@ -140,9 +148,9 @@ class RecipeViewModel(application: Application) : BaseViewModel(application) {
                 return@launch
             }
 
-            // 新建一个空的 SavedRecipe 作为 cookbook 占位（或根据需求定义结构）
+            // placeholder
             val placeholder = SavedRecipe(
-                label = "",  // 空标题，表示只是一个容器
+                label = "placeholder recipe",
                 image = "",
                 url = "",
                 ingredientLines = listOf(),
@@ -167,6 +175,67 @@ class RecipeViewModel(application: Application) : BaseViewModel(application) {
             loadCookbooks()
         }
     }
+
+
+    val savedRecipeUrls = derivedStateOf {
+        savedRecipes.value.map { it.url }.toSet()
+    }
+
+    fun isRecipeSaved(recipe: Recipe): Boolean {
+        return savedRecipeUrls.value.contains(recipe.uri ?: "")
+    }
+
+    fun saveRecipeToCookbook(recipe: Recipe, cookbookName: String = "default", isFavorite: Boolean = false) {
+        if (!isUserLoggedIn()) {
+            Log.w("PantryPal", "Cannot save recipe: No user logged in")
+            return
+        }
+
+        viewModelScope.launch {
+
+            val savedRecipe = recipe.toSavedRecipe(getCurrentUserId(), isFavorite, cookbookName)
+            repository.insertRecipe(savedRecipe)
+            loadRecipesByCookbook(cookbookName)
+            //loadSavedRecipes()
+        }
+    }
+
+    fun deleteRecipeByUrl(url: String) {
+        viewModelScope.launch {
+            val matching = savedRecipes.value.firstOrNull { it.url == url }
+            matching?.let {
+                repository.deleteRecipe(it)
+                loadSavedRecipes()
+            }
+        }
+    }
+
+    fun Recipe.toSavedRecipe(
+        userId: Int,
+        isFavorite: Boolean = false,
+        cookbookName: String = "default"
+    ): SavedRecipe {
+        return SavedRecipe(
+            label = this.label,
+            image = this.image,
+            url = this.uri,
+            ingredientLines = this.ingredientLines,
+            calories = 0.0,
+            isFavorite = isFavorite,
+            userId = userId,
+            cookbookName = cookbookName
+        )
+    }
+
+    fun SavedRecipe.toRecipe(): Recipe {
+        return Recipe(
+            label = this.label,
+            image = this.image,
+            ingredientLines = this.ingredientLines,
+            uri = this.url
+        )
+    }
+
 
 
 

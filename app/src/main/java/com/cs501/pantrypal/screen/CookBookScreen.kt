@@ -54,6 +54,7 @@ fun CookBookScreen(
     val cookbooks by viewModel.cookbooks.collectAsState()
     var showDialog by remember { mutableStateOf(false) }
     var newCookbookName by remember { mutableStateOf("") }
+    val recipeCounts by viewModel.cookbookRecipeCounts.collectAsState()
 
     LaunchedEffect(Unit) {
         viewModel.loadCookbooks()
@@ -113,6 +114,7 @@ fun CookBookScreen(
 
         LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
             items(cookbooks) { cookbookName ->
+
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
@@ -138,7 +140,7 @@ fun CookBookScreen(
                                 fontWeight = FontWeight.SemiBold
                             )
                             Text(
-                                text = "${viewModel.getRecipeCountInCookbook(cookbookName)} recipes",
+                                text = "${recipeCounts[cookbookName]} recipes",
                                 fontSize = 14.sp,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )

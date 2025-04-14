@@ -15,7 +15,9 @@ import androidx.compose.ui.Modifier
 import com.cs501.pantrypal.ui.theme.PantryPalTheme
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
+import androidx.navigation.NavType
 import androidx.navigation.compose.*
+import androidx.navigation.navArgument
 import com.cs501.pantrypal.navigation.BottomNavigationBar
 import com.cs501.pantrypal.screen.*
 import com.cs501.pantrypal.screen.profilePage.LoginScreen
@@ -78,9 +80,21 @@ fun AppNavHost() {
             }
             composable("detail") { backStack ->
                 recipeViewModel.selectedRecipe?.let {
-                    RecipeDetailScreen(it, navController)
+                    RecipeDetailScreen(recipeViewModel, navController)
                 } ?: Text("No recipe selected")
             }
+            composable(
+                route = "cookbook_detail/{cookbookName}",
+                arguments = listOf(navArgument("cookbookName") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val cookbookName = backStackEntry.arguments?.getString("cookbookName") ?: "default"
+                CookBookDetailScreen(cookbookName, navController, recipeViewModel)
+            }
+            composable("recipe_detail") {
+                RecipeDetailScreen(viewModel = recipeViewModel, navController = navController)
+            }
+
+
         }
     }
 }
