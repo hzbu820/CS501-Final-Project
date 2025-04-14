@@ -4,14 +4,3 @@ plugins {
     alias(libs.plugins.kotlin.android) apply false
     alias(libs.plugins.kotlin.compose) apply false
 }
-
-// Configure all tasks to use Java 11 compatibility
-tasks.withType<JavaCompile>().configureEach {
-    options.release.set(11)
-}
-
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
-    kotlinOptions {
-        jvmTarget = "11"
-    }
-}
