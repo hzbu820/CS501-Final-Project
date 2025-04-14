@@ -154,7 +154,7 @@ fun GroceryListScreen(
                     containerColor = MaterialTheme.colorScheme.primary
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Add,
+                        imageVector = Icons.Default.AddShoppingCart,
                         contentDescription = "Add Item",
                         tint = Color.White
                     )
@@ -469,7 +469,8 @@ fun AddGroceryItemDialog(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 8.dp),
-                    singleLine = true
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                 )
                 
                 // Quantity field
@@ -481,7 +482,7 @@ fun AddGroceryItemDialog(
                         .fillMaxWidth()
                         .padding(vertical = 8.dp),
                     singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next,keyboardType = KeyboardType.Number)
                 )
                 
                 // Unit field with dropdown

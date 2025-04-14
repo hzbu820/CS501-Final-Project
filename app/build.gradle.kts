@@ -57,6 +57,7 @@ dependencies {
     implementation (libs.androidx.lifecycle.viewmodel.compose.v270)
     implementation (libs.androidx.datastore.preferences)
     implementation (libs.androidx.datastore.core)
+    implementation(libs.androidx.material.icons.extended)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
