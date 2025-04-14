@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.cs501.pantrypal.data.database.GroceryItem
+import com.cs501.pantrypal.util.Constants
 import com.cs501.pantrypal.viewmodel.GroceryViewModel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -435,15 +436,12 @@ fun AddGroceryItemDialog(
     var unit by remember { mutableStateOf("") }
     var category by remember { mutableStateOf("") }
     
-    // Unit dropdown options
-    val unitOptions = listOf("g", "kg", "ml", "L", "oz", "lb", "pcs")
+    // Unit dropdown options from Constants
+    val unitOptions = Constants.MEASUREMENT_UNITS
     var expandedUnitMenu by remember { mutableStateOf(false) }
     
-    // Category dropdown options
-    val categoryOptions = listOf(
-        "Fruits", "Vegetables", "Meat", "Dairy", "Grains",
-        "Seafood", "Spices", "Beverages", "Snacks", "Other"
-    )
+    // Category dropdown options from Constants
+    val categoryOptions = Constants.FOOD_CATEGORIES
     var expandedCategoryMenu by remember { mutableStateOf(false) }
     
     val isFormValid = name.isNotBlank()

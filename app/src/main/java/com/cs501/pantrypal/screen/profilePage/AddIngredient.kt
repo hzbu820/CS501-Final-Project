@@ -21,6 +21,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.cs501.pantrypal.data.database.UserIngredients
+import com.cs501.pantrypal.util.Constants
 import com.cs501.pantrypal.viewmodel.UserIngredientsViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collectLatest
@@ -90,12 +91,9 @@ fun AddIngredientScreen(
     var showSuggestions by remember { mutableStateOf(false) }
     var filteredIngredients by remember { mutableStateOf<List<UserIngredients>>(emptyList()) }
 
-    // Unit and category options
-    val unitOptions = listOf("g", "kg", "ml", "L", "oz", "lb", "gal")
-    val predefinedCategories = listOf(
-        "Fruits", "Vegetables", "Meat", "Dairy", "Grains",
-        "Seafood", "Spices", "Beverages", "Snacks", "Other"
-    )
+    // Unit and category options from Constants
+    val unitOptions = Constants.MEASUREMENT_UNITS
+    val predefinedCategories = Constants.FOOD_CATEGORIES
 
     // Show suggestions based on user input
     LaunchedEffect(formState.name) {
