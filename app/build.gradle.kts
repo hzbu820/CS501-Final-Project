@@ -7,12 +7,12 @@ plugins {
 
 android {
     namespace = "com.cs501.pantrypal"
-    compileSdk = 35
+    compileSdk = 34
 
     defaultConfig {
         applicationId = "com.cs501.pantrypal"
         minSdk = 33
-        targetSdk = 35
+        targetSdk = 34
         versionCode = 1
         versionName = "1.0"
 
