@@ -76,12 +76,34 @@ class GroceryViewModel(application: Application) : BaseViewModel(application) {
 
     private fun refreshGroceryItems() {
         viewModelScope.launch {
-            if (!_showCheckedItems.value) {
-                repository.getGroceryItemsByCheckedStatus(getCurrentUserId(), false).collect { items ->
-                    _allGroceryItems.value = items
+            // Apply filters based on checked status and category
+            val userId = getCurrentUserId()
+            val showChecked = _showCheckedItems.value
+            val category = _categoryFilter.value
+            
+            when {
+                // Filter by both checked status and category
+                !showChecked && category != null -> {
+                    repository.getGroceryItemsByCategory(userId, category, false ).collect { items ->
+                        _allGroceryItems.value = items
+                    }
                 }
-            } else {
-                getAllGroceryItems()
+                // Filter by checked status only
+                !showChecked -> {
+                    repository.getGroceryItemsByCheckedStatus(userId, false).collect { items ->
+                        _allGroceryItems.value = items
+                    }
+                }
+                // Filter by category only
+                category != null -> {
+                    repository.getGroceryItemsByCategory(userId, category, false).collect { items ->
+                        _allGroceryItems.value = items
+                    }
+                }
+                // No filters
+                else -> {
+                    getAllGroceryItems()
+                }
             }
         }
     }
@@ -130,4 +152,4 @@ class GroceryViewModel(application: Application) : BaseViewModel(application) {
             getAllGroceryItems()
         }
     }
-} 
+}

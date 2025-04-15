@@ -53,4 +53,12 @@ class GroceryRepository(private val groceryItemDao: GroceryItemDao) {
     suspend fun deleteAllCheckedItems(userId: Int) {
         groceryItemDao.deleteAllCheckedItems(userId)
     }
+
+    /**
+     * Get grocery items by category
+     */
+    fun getGroceryItemsByCategory(userId: Int, category: String, isChecked: Boolean): Flow<List<GroceryItem>> {
+        return groceryItemDao.getGroceryItemsByCategory(userId, category, isChecked)
+    }
+
 } 

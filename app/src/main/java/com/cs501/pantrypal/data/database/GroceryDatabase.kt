@@ -38,4 +38,7 @@ interface GroceryItemDao {
 
     @Query("DELETE FROM grocery_items WHERE userId = :userId AND isChecked = 1")
     suspend fun deleteAllCheckedItems(userId: Int)
+
+    @Query("SELECT * FROM grocery_items WHERE userId = :userId AND category = :category AND isChecked = :isChecked ORDER BY dateAdded DESC")
+    fun getGroceryItemsByCategory(userId: Int, category: String, isChecked: Boolean): Flow<List<GroceryItem>>
 } 

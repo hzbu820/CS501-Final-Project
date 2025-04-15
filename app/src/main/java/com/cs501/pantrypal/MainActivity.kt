@@ -1,6 +1,7 @@
 package com.cs501.pantrypal
 
 import android.app.Application
+import android.content.pm.ActivityInfo
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -36,6 +37,11 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        requestedOrientation = if (resources.configuration.screenWidthDp >= 600) {
+            ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+        } else {
+            ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+        }
         setContent {
             PantryPalTheme {
                 AppNavHost()
@@ -77,7 +83,7 @@ fun AppNavHost() {
                 CookBookScreen(navController, recipeViewModel)
             }
             composable("grocerylist") {
-                GroceryListScreen(groceryViewModel, navController, snackbarHostState)
+                GroceryListScreen(groceryViewModel, snackbarHostState)
             }
             composable("profile") {
                 ProfileScreen(userViewModel, navController, snackbarHostState, userIngredientsViewModel)
