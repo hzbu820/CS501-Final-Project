@@ -4,6 +4,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -11,10 +14,10 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.cs501.pantrypal.ui.theme.ErrorColor
+import com.cs501.pantrypal.ui.theme.Typography
 import com.cs501.pantrypal.viewmodel.RecipeViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -37,7 +40,7 @@ fun CookBookDetailScreen(
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(
-                            painter = painterResource(id = android.R.drawable.ic_menu_revert),
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back"
                         )
                     }
@@ -51,7 +54,7 @@ fun CookBookDetailScreen(
                 .padding(16.dp)
                 .fillMaxSize()
         ) {
-            Text("Recipes in $cookbookName", fontSize = 20.sp, modifier = Modifier.padding(bottom = 12.dp))
+            Text("Recipes in $cookbookName", style = Typography.titleLarge, modifier = Modifier.padding(bottom = 12.dp))
 
             LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 items(recipes.filter { it.cookbookName == cookbookName }) { recipe ->
@@ -74,16 +77,17 @@ fun CookBookDetailScreen(
                                         navController.navigate("recipe_detail")
                                     }
                             ) {
-                                Text(recipe.label, fontSize = 16.sp)
-                                Text(recipe.ingredientLines.joinToString(", "), fontSize = 12.sp)
+                                Text(recipe.label, style = MaterialTheme.typography.titleMedium)
+                                Text(recipe.ingredientLines.joinToString(", "), style = MaterialTheme.typography.bodySmall)
                             }
 
                             IconButton(onClick = {
                                 viewModel.deleteSavedRecipe(recipe)
                             }) {
                                 Icon(
-                                    painter = painterResource(id = android.R.drawable.ic_delete),
-                                    contentDescription = "Delete Recipe"
+                                    imageVector = Icons.Filled.Delete,
+                                    contentDescription = "Delete Recipe",
+                                    tint = ErrorColor
                                 )
                             }
                         }

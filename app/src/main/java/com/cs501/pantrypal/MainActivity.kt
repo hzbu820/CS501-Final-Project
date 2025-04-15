@@ -71,7 +71,7 @@ fun AppNavHost() {
                 RegisterScreen(userViewModel, navController, snackbarHostState)
             }
             composable("discover") {
-                RecipeSearchScreen(recipeViewModel, navController)
+                RecipeSearchScreen(recipeViewModel, navController, snackbarHostState)
             }
             composable("cookbook") {
                 CookBookScreen(navController, recipeViewModel)

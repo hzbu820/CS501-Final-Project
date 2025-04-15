@@ -137,7 +137,6 @@ private fun ProfileTopBar(
         Text(
             text = "Profile",
             style = Typography.displayLarge,
-            modifier = Modifier.padding(bottom = 8.dp)
         )
 
         if (isLoggedIn) {

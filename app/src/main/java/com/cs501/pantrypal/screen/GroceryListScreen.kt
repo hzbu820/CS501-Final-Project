@@ -6,7 +6,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -35,6 +34,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.cs501.pantrypal.data.database.GroceryItem
+import com.cs501.pantrypal.ui.theme.ErrorColor
+import com.cs501.pantrypal.ui.theme.InfoColor
+import com.cs501.pantrypal.ui.theme.SecondaryLight
+import com.cs501.pantrypal.ui.theme.TextSecondary
+import com.cs501.pantrypal.ui.theme.TextTertiary
+import com.cs501.pantrypal.ui.theme.Typography
 import com.cs501.pantrypal.util.Constants
 import com.cs501.pantrypal.viewmodel.GroceryViewModel
 import kotlinx.coroutines.flow.collectLatest
@@ -72,9 +77,7 @@ fun GroceryListScreen(
         ) {
             Text(
                 text = "Grocery List",
-                fontSize = 28.sp,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
+                style = Typography.displayLarge
             )
             
             Row {
@@ -83,7 +86,7 @@ fun GroceryListScreen(
                     Icon(
                         imageVector = Icons.Default.Settings,
                         contentDescription = "Filter",
-                        tint = MaterialTheme.colorScheme.primary
+                        tint = InfoColor
                     )
                 }
                 
@@ -97,7 +100,7 @@ fun GroceryListScreen(
                     Icon(
                         imageVector = Icons.Outlined.Delete,
                         contentDescription = "Clear completed",
-                        tint = MaterialTheme.colorScheme.primary
+                        tint = ErrorColor
                     )
                 }
             }
@@ -129,38 +132,40 @@ fun GroceryListScreen(
                 }
             )
         }
-        
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth()
+        ) {
         // Grocery List
-        if (allGroceryItems.isEmpty()) {
-            EmptyGroceryList(onAddItem = { showAddItemDialog = true })
-        } else {
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth()
-            ) {
+            if (allGroceryItems.isEmpty()) {
+                EmptyGroceryList(onAddItem = { showAddItemDialog = true })
+            } else {
                 GroceryItemsList(
                     groceryItems = allGroceryItems,
                     onToggleItem = { groceryViewModel.toggleItemChecked(it) },
                     onDeleteItem = { groceryViewModel.deleteGroceryItem(it) }
                 )
-                
-                // Add button
-                FloatingActionButton(
-                    onClick = { showAddItemDialog = true },
-                    modifier = Modifier
-                        .align(Alignment.BottomEnd)
-                        .padding(16.dp),
-                    containerColor = MaterialTheme.colorScheme.primary
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.AddShoppingCart,
-                        contentDescription = "Add Item",
-                        tint = Color.White
-                    )
-                }
+            }
+
+            // Add button
+            FloatingActionButton(
+                onClick = { showAddItemDialog = true },
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(16.dp),
+                containerColor = InfoColor,
+                shape = CircleShape,
+            ) {
+                Icon(
+                    imageVector = Icons.Default.AddShoppingCart,
+                    contentDescription = "Add Item",
+                    tint = Color.White
+                )
             }
         }
+
+
     }
     
     // Add Item Dialog
@@ -384,44 +389,26 @@ fun EmptyGroceryList(onAddItem: () -> Unit) {
     ) {
         Icon(
             imageVector = Icons.Outlined.ShoppingCart,
-            contentDescription = null,
+            contentDescription = "Empty grocery list",
             modifier = Modifier.size(120.dp),
-            tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+            tint = InfoColor.copy(alpha = 0.5f)
         )
         
         Spacer(modifier = Modifier.height(16.dp))
         
         Text(
             text = "Your grocery list is empty",
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Medium,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+            style = Typography.displayMedium,
+            color = TextSecondary
         )
         
         Spacer(modifier = Modifier.height(8.dp))
         
         Text(
             text = "Add your first item to get started",
-            fontSize = 16.sp,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+            style = Typography.bodyMedium,
+            color = TextTertiary,
         )
-        
-        Spacer(modifier = Modifier.height(24.dp))
-        
-        Button(
-            onClick = onAddItem,
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.primary
-            )
-        ) {
-            Icon(
-                imageVector = Icons.Default.Add,
-                contentDescription = null,
-                modifier = Modifier.size(20.dp)
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text("Add Item")
-        }
     }
 }
 
@@ -451,8 +438,7 @@ fun AddGroceryItemDialog(
         title = {
             Text(
                 text = "Add Grocery Item",
-                fontWeight = FontWeight.Bold,
-                fontSize = 20.sp
+                style = Typography.headlineLarge,
             )
         },
         text = {
@@ -571,13 +557,17 @@ fun AddGroceryItemDialog(
                         onAddItem(name, quantity, unit, category)
                     }
                 },
-                enabled = isFormValid
+                enabled = isFormValid,
+                colors = ButtonDefaults.buttonColors(InfoColor)
             ) {
                 Text("Add")
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
+            TextButton(
+                onClick = onDismiss,
+                colors = ButtonDefaults.textButtonColors(contentColor = InfoColor)
+            ) {
                 Text("Cancel")
             }
         }
