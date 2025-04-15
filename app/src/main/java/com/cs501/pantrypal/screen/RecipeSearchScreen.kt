@@ -92,7 +92,7 @@ fun TabletRecipeSearchLayout(
         Card(
             modifier = Modifier
                 .fillMaxHeight()
-                .width(240.dp)
+                .width(300.dp)
                 .padding(16.dp),
             elevation = CardDefaults.cardElevation(4.dp),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)

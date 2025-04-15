@@ -25,4 +25,19 @@ object Constants {
         "Snacks", 
         "Other"
     )
+
+
+    /**
+     * Common Cookbook categories for organizing recipes
+     */
+    val COOKBOOK_CATEGORIES = listOf(
+        "Breakfast",
+        "Lunch",
+        "Dinner",
+        "Dessert",
+        "Snacks",
+        "Appetizers",
+        "Salads",
+        "Soups"
+    )
 }

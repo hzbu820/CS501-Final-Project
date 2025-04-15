@@ -202,7 +202,7 @@ fun TabletGroceryLayout(
         // Left sidebar with categories and search
         Card(
             modifier = Modifier
-                .width(240.dp)
+                .width(300.dp)
                 .fillMaxHeight()
                 .padding(8.dp),
             elevation = CardDefaults.cardElevation(4.dp),
