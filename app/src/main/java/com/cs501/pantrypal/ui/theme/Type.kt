@@ -13,7 +13,6 @@ val Typography = Typography(
         fontSize = 28.sp,
         lineHeight = 36.sp,
         letterSpacing = 0.sp,
-        color = TextPrimaryLight
     ),
     displayMedium = TextStyle(
         fontFamily = FontFamily.Default,
