@@ -12,7 +12,7 @@ data class GroceryItem(
     val unit: String,
     val category: String,
     val isChecked: Boolean = false,
-    val userId: Int,
+    val userId: Int,// Set to 0 as global items
     val dateAdded: Long = System.currentTimeMillis()
 )
 
