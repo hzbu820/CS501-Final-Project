@@ -1,8 +1,8 @@
 package com.cs501.pantrypal.navigation
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.automirrored.filled.MenuBook
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.Icon
@@ -25,12 +25,12 @@ val bottomNavItems = listOf(
     BottomNavItem(
         name = "Discover",
         route = "discover",
-        icon = Icons.Default.Home
+        icon = Icons.Default.Search
     ),
     BottomNavItem(
         name = "CookBook",
         route = "cookbook",
-        icon = Icons.Default.Menu
+        icon = Icons.AutoMirrored.Filled.MenuBook
     ),
     BottomNavItem(
         name = "Grocery List",
