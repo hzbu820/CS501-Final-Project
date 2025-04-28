@@ -2,6 +2,7 @@ package com.cs501.pantrypal.data.repository
 
 import com.cs501.pantrypal.data.database.UserIngredients
 import com.cs501.pantrypal.data.database.UserIngredientsDao
+import com.cs501.pantrypal.data.network.ApiClient
 import kotlinx.coroutines.flow.Flow
 
 class UserIngredientsRepository(private val userIngredientsDao: UserIngredientsDao) {
@@ -59,6 +60,25 @@ class UserIngredientsRepository(private val userIngredientsDao: UserIngredientsD
      */
     suspend fun deleteIngredient(ingredient: UserIngredients) {
         userIngredientsDao.deleteIngredient(ingredient)
+    }
+
+    /**
+     * Search ingredients by Barcode
+     */
+    suspend fun searchIngredientsByBarcode(barcode: String) {
+        // Get barcode's length to check if it there should be a leading zero
+        val leadingZero = when (barcode.length) {
+            12 -> "0"
+            else -> ""
+        }
+        // Add leading zero if needed
+        val barcode = leadingZero + barcode
+        //TODO: Finish the searchIngredientsByBarcode function once the API is ready
+        val response = ApiClient.foodRetrofit.searchIdByCode(barcode = barcode)
+        val foodId = response.foodId
+//        val foodResponse = ApiClient.foodRetrofit.searchFoodById(foodId = foodId)
+//        val food = foodResponse.food
+        return
     }
 
 }
