@@ -59,20 +59,6 @@ fun RecipeSearchScreen(viewModel: RecipeViewModel, navController: NavController,
         )
     }
 
-//    if (showShakeInfo) {
-//        AlertDialog(
-//            onDismissRequest = { onShowShakeInfoChange(false) },
-//            title = { Text("Shake for Surprise") },
-//            text = {
-//                Text("Shake your device to get a random recipe suggestion based on trending ingredients! Perfect when you're not sure what to cook.")
-//            },
-//            confirmButton = {
-//                TextButton(onClick = { onShowShakeInfoChange(false) }) {
-//                    Text("Got it!")
-//                }
-//            }
-//        )
-//    }
 }
 
 @Composable

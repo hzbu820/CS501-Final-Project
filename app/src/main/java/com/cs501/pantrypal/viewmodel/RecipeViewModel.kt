@@ -197,7 +197,7 @@ class RecipeViewModel(application: Application) : BaseViewModel(application) {
         return savedRecipeUrls.value.contains(recipe.uri ?: "")
     }
 
-    fun saveRecipeToCookbook(recipe: Recipe, cookbookName: String = "default", isFavorite: Boolean = false) {
+    fun saveRecipeToCookbook(recipe: Recipe, cookbookName: String = "Default", isFavorite: Boolean = false) {
         if (!isUserLoggedIn()) {
             Log.w("PantryPal", "Cannot save recipe: No user logged in")
             return
@@ -221,6 +221,11 @@ class RecipeViewModel(application: Application) : BaseViewModel(application) {
             }
         }
     }
+
+    suspend fun isRecipeInCookbook(url: String, cookbookName: String): Boolean {
+        return repository.isRecipeInCookbook(url, cookbookName)
+    }
+
 
     fun Recipe.toSavedRecipe(
         userId: String,

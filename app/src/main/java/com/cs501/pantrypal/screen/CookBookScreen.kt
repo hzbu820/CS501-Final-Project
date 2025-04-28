@@ -329,7 +329,7 @@ fun TabletCookBookLayout(
                 // Cookbooks header
                 Row(verticalAlignment= Alignment.CenterVertically) {
                     Text(
-                    text = "Custom Cookbooks",
+                    text = "Cookcooks with Recipes",
                     style = Typography.headlineMedium,
                     modifier = Modifier.padding(vertical = 8.dp)
                     )
