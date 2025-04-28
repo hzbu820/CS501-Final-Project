@@ -12,7 +12,6 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.cs501.pantrypal.ui.theme.ErrorColor
 import com.cs501.pantrypal.ui.theme.InfoColor
@@ -32,7 +31,7 @@ fun LoginScreen(userViewModel: UserViewModel, navController: NavController, snac
         }
     }
     
-    var username by remember { mutableStateOf("") }
+    var emailAddress by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
@@ -40,7 +39,7 @@ fun LoginScreen(userViewModel: UserViewModel, navController: NavController, snac
     val coroutineScope = rememberCoroutineScope()
 
     suspend fun performLogin(
-        username: String,
+        emailAddress: String,
         password: String,
         userViewModel: UserViewModel,
         navController: NavController,
@@ -48,17 +47,22 @@ fun LoginScreen(userViewModel: UserViewModel, navController: NavController, snac
         onLoading: (Boolean) -> Unit,
         onError: (String) -> Unit
     ): Boolean {
-        if (username.isBlank() || password.isBlank()) {
-            onError("Username and password cannot be empty")
+        if (emailAddress.isBlank() || password.isBlank()) {
+            onError("Email and password cannot be empty")
+            return false
+        }
+
+        if (!android.util.Patterns.EMAIL_ADDRESS.matcher(emailAddress).matches()) {
+            onError("Invalid email address")
             return false
         }
 
         onLoading(true)
-        val success = userViewModel.login(username, password)
+        val success = userViewModel.login(emailAddress, password)
         onLoading(false)
 
         if (!success) {
-            onError("Username or password is incorrect")
+            onError("Email or password is incorrect")
             return false
         }
 
@@ -102,9 +106,9 @@ fun LoginScreen(userViewModel: UserViewModel, navController: NavController, snac
         )
         
         OutlinedTextField(
-            value = username,
-            onValueChange = { username = it },
-            label = { Text("Username") },
+            value = emailAddress,
+            onValueChange = { emailAddress = it },
+            label = { Text("Email") },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 8.dp),
@@ -135,7 +139,7 @@ fun LoginScreen(userViewModel: UserViewModel, navController: NavController, snac
         Button(
             onClick = {
                 coroutineScope.launch {
-                    performLogin(username, password, userViewModel, navController, snackbarHostState, { isLoading = it }, { errorMessage = it })
+                    performLogin(emailAddress, password, userViewModel, navController, snackbarHostState, { isLoading = it }, { errorMessage = it })
                 }
             },
             modifier = Modifier

@@ -39,7 +39,7 @@ class GroceryViewModel(application: Application) : BaseViewModel(application) {
         getAllGroceryItems()
     }
 
-    override fun onUserIdChanged(userId: Int) {
+    override fun onUserIdChanged(userId: String) {
         getAllGroceryItems()
     }
 
