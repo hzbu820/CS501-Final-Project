@@ -54,6 +54,7 @@ dependencies {
 
     implementation (libs.androidx.room.runtime)
     implementation (libs.androidx.room.ktx)
+    implementation(libs.firebase.firestore.ktx)
     kapt(libs.androidx.room.compiler)
     implementation (libs.androidx.lifecycle.viewmodel.compose.v270)
     implementation (libs.androidx.datastore.preferences)

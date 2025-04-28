@@ -31,6 +31,7 @@ object Constants {
      * Common Cookbook categories for organizing recipes
      */
     val COOKBOOK_CATEGORIES = listOf(
+        "Default",
         "Breakfast",
         "Lunch",
         "Dinner",
@@ -38,6 +39,6 @@ object Constants {
         "Snacks",
         "Appetizers",
         "Salads",
-        "Soups"
+        "Soups",
     )
 }

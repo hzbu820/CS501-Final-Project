@@ -97,4 +97,8 @@ interface SavedRecipeDao {
     @Query("DELETE FROM saved_recipes WHERE cookbookName = :cookbook")
     suspend fun deleteByCookbook(cookbook: String)
 
+    @Query("SELECT * FROM saved_recipes WHERE url = :url AND cookbookName = :cookbookName LIMIT 1")
+    suspend fun isRecipeInCookbook(url: String, cookbookName: String): SavedRecipe?
+
+
 }

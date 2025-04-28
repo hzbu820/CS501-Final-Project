@@ -67,5 +67,9 @@ class RecipeRepository(private val savedRecipeDao: SavedRecipeDao) {
     fun getAllCookbookNames(): Flow<List<String>> {
         return savedRecipeDao.getAllCookbookNames()
     }
+    suspend fun isRecipeInCookbook(url: String, cookbookName: String): Boolean {
+        return savedRecipeDao.isRecipeInCookbook(url, cookbookName) != null
+    }
+
 
 }
