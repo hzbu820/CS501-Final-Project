@@ -104,9 +104,6 @@ fun AppNavHost() {
                 RecipeDetailScreen(viewModel = recipeViewModel, navController = navController)
             }
 
-            composable("add_ingredient") {
-                AddIngredientScreen(userIngredientsViewModel, navController, snackbarHostState)
-            }
         }
     }
 }

@@ -46,7 +46,7 @@ class RecipeViewModel(application: Application) : BaseViewModel(application) {
         }
     }
 
-    override fun onUserIdChanged(userId: Int) {
+    override fun onUserIdChanged(userId: String) {
         loadSavedRecipes()
     }
     
@@ -56,7 +56,7 @@ class RecipeViewModel(application: Application) : BaseViewModel(application) {
     private fun loadSavedRecipes() {
         viewModelScope.launch {
             val userId = getCurrentUserId()
-            if (userId <= 0) {
+            if (userId == "") {
                 Log.w("PantryPal", "No user logged in, cannot load saved recipes")
                 return@launch
             }
@@ -154,7 +154,7 @@ class RecipeViewModel(application: Application) : BaseViewModel(application) {
     fun createCookbook(name: String) {
         viewModelScope.launch {
             val userId = getCurrentUserId()
-            if (userId <= 0) {
+            if (userId == "") {
                 Log.w("PantryPal", "Cannot create cookbook: No user logged in")
                 return@launch
             }
@@ -223,7 +223,7 @@ class RecipeViewModel(application: Application) : BaseViewModel(application) {
     }
 
     fun Recipe.toSavedRecipe(
-        userId: Int,
+        userId: String,
         isFavorite: Boolean = false,
         cookbookName: String = "default"
     ): SavedRecipe {

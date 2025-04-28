@@ -1,0 +1,180 @@
+package com.cs501.pantrypal.data.firebase
+
+import android.util.Log
+import com.cs501.pantrypal.data.database.User
+import com.cs501.pantrypal.data.database.UserIngredients
+import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+
+class FirebaseService {
+    private val db = FirebaseFirestore.getInstance()
+
+    suspend fun syncUserData(user: User): Boolean {
+        return try {
+            withContext(Dispatchers.IO) {
+                val userMap = mapOf(
+                    "id" to user.id,
+                    "username" to user.username,
+                    "email" to user.email,
+                    "createdAt" to user.createdAt,
+                    "password" to user.password,
+                )
+
+                db.collection("users")
+                    .document(user.id.toString())
+                    .set(userMap)
+                    .await()
+
+                true
+            }
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    suspend fun syncUserIngredients(ingredients: List<UserIngredients>, userId: String): Boolean {
+        return try {
+            withContext(Dispatchers.IO) {
+                val batch = db.batch()
+
+                val existingDocs = db.collection("users")
+                    .document(userId.toString())
+                    .collection("ingredients")
+                    .get()
+                    .await()
+
+                for (doc in existingDocs) {
+                    batch.delete(doc.reference)
+                }
+
+                for (ingredient in ingredients) {
+                    val docRef = db.collection("users")
+                        .document(userId.toString())
+                        .collection("ingredients")
+                        .document(ingredient.id.toString())
+
+                    batch.set(docRef, ingredient)
+                }
+
+                batch.commit().await()
+
+                true
+            }
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    suspend fun restoreUserIngredients(userId: String): List<UserIngredients> {
+        return try {
+            withContext(Dispatchers.IO) {
+                val querySnapshot = db.collection("users")
+                    .document(userId.toString())
+                    .collection("ingredients")
+                    .get()
+                    .await()
+
+                querySnapshot.documents.mapNotNull { doc ->
+                    val data = doc.data
+                    if (data != null) {
+                        UserIngredients(
+                            id = (data["id"] as Long).toInt(),
+                            name = data["name"] as String,
+                            foodCategory = data["foodCategory"] as String,
+                            image = data["image"] as String,
+                            quantity = data["quantity"] as String,
+                            unit = data["unit"] as String,
+                            expirationDate = data["expirationDate"] as String,
+                            location = data["location"] as String,
+                            notes = data["notes"] as String,
+                            isFavorite = data["isFavorite"] as Boolean,
+                            userId = (data["userId"] as String)
+                        )
+
+                    } else null
+
+                }
+            }
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+
+    suspend fun isEmailNotRegistered(email: String): Boolean {
+        return try {
+            withContext(Dispatchers.IO) {
+                val querySnapshot = db.collection("users")
+                    .whereEqualTo("email", email)
+                    .get()
+                    .await()
+
+                querySnapshot.isEmpty
+            }
+        } catch (e: Exception) {
+            true
+        }
+    }
+
+    suspend fun getUserByEmail(email: String): User? {
+        return try {
+            withContext(Dispatchers.IO) {
+                val querySnapshot = db.collection("users")
+                    .whereEqualTo("email", email)
+                    .get()
+                    .await()
+
+                if (querySnapshot.isEmpty) null
+                else {
+                    val data = querySnapshot.documents[0].data
+                    if (data != null) {
+                        User(
+                            id = (data["id"] as String),
+                            username = data["username"] as String,
+                            password = data["password"] as String,
+                            email = data["email"] as String,
+                            createdAt = data["createdAt"] as Long
+                        )
+                    } else null
+                }
+            }
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    suspend fun deleteUserAccount(userId: String, password: String): Boolean {
+        return try {
+            withContext(Dispatchers.IO) {
+                db.collection("users")
+                    .document(userId)
+                    .delete()
+                    .await()
+
+                true
+            }
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    suspend fun updateUserPassword(userId: String, oldPassword: String, newPassword: String): Boolean {
+        return try {
+            withContext(Dispatchers.IO) {
+                val userMap = mapOf(
+                    "password" to newPassword
+                )
+
+                db.collection("users")
+                    .document(userId)
+                    .update(userMap)
+                    .await()
+
+                true
+            }
+        } catch (e: Exception) {
+            false
+        }
+    }
+}

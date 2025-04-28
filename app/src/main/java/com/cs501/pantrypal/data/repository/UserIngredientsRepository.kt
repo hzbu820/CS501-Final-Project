@@ -8,35 +8,35 @@ class UserIngredientsRepository(private val userIngredientsDao: UserIngredientsD
     /**
      * Get all ingredients by user ID
      */
-    fun getAllIngredientsByUserId(userId: Int): Flow<List<UserIngredients>> {
+    fun getAllIngredientsByUserId(userId: String): Flow<List<UserIngredients>> {
         return userIngredientsDao.getAllIngredientsByUserId(userId)
     }
 
     /**
      * Get all favorite ingredients by user ID
      */
-    fun getFavoriteIngredientsByUserId(userId: Int): Flow<List<UserIngredients>> {
+    fun getFavoriteIngredientsByUserId(userId: String): Flow<List<UserIngredients>> {
         return userIngredientsDao.getFavoriteIngredientsByUserId(userId)
     }
 
     /**
      * Search ingredients by user ID
      */
-    fun searchIngredientsByUserId(searchQuery: String, userId: Int): Flow<List<UserIngredients>> {
+    fun searchIngredientsByUserId(searchQuery: String, userId: String): Flow<List<UserIngredients>> {
         return userIngredientsDao.searchIngredientsByUserId(searchQuery, userId)
     }
 
     /**
      * Search ingredients by user ID and food category
      */
-    fun searchIngredientsByUserIdAndName(category: String, userId: Int): Flow<List<UserIngredients>> {
+    fun searchIngredientsByUserIdAndName(category: String, userId: String): Flow<List<UserIngredients>> {
         return userIngredientsDao.searchIngredientsByUserIdAndCategory(category, userId)
     }
 
     /**
      * Search ingredients by user ID and expiration date
      */
-    fun searchIngredientsByUserIdAndExpirationDate(expirationDate: String, userId: Int): Flow<List<UserIngredients>> {
+    fun searchIngredientsByUserIdAndExpirationDate(expirationDate: String, userId: String): Flow<List<UserIngredients>> {
         return userIngredientsDao.searchIngredientsByUserIdAndExpirationDate(expirationDate, userId)
     }
 

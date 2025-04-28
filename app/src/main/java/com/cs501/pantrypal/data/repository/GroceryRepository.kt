@@ -8,21 +8,21 @@ class GroceryRepository(private val groceryItemDao: GroceryItemDao) {
     /**
      * Get all grocery items by user ID
      */
-    fun getAllGroceryItemsByUserId(userId: Int): Flow<List<GroceryItem>> {
+    fun getAllGroceryItemsByUserId(userId: String): Flow<List<GroceryItem>> {
         return groceryItemDao.getAllGroceryItemsByUserId(userId)
     }
 
     /**
      * Get grocery items by checked status
      */
-    fun getGroceryItemsByCheckedStatus(userId: Int, isChecked: Boolean): Flow<List<GroceryItem>> {
+    fun getGroceryItemsByCheckedStatus(userId: String, isChecked: Boolean): Flow<List<GroceryItem>> {
         return groceryItemDao.getGroceryItemsByCheckedStatus(userId, isChecked)
     }
     
     /**
      * Search grocery items
      */
-    fun searchGroceryItems(userId: Int, searchQuery: String): Flow<List<GroceryItem>> {
+    fun searchGroceryItems(userId: String, searchQuery: String): Flow<List<GroceryItem>> {
         return groceryItemDao.searchGroceryItems(userId, searchQuery)
     }
     
@@ -50,14 +50,14 @@ class GroceryRepository(private val groceryItemDao: GroceryItemDao) {
     /**
      * Delete all checked items
      */
-    suspend fun deleteAllCheckedItems(userId: Int) {
+    suspend fun deleteAllCheckedItems(userId: String) {
         groceryItemDao.deleteAllCheckedItems(userId)
     }
 
     /**
      * Get grocery items by category
      */
-    fun getGroceryItemsByCategory(userId: Int, category: String, isChecked: Boolean): Flow<List<GroceryItem>> {
+    fun getGroceryItemsByCategory(userId: String, category: String, isChecked: Boolean): Flow<List<GroceryItem>> {
         return groceryItemDao.getGroceryItemsByCategory(userId, category, isChecked)
     }
 
