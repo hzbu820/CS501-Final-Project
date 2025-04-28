@@ -1,6 +1,7 @@
 package com.cs501.pantrypal
 
 import android.app.Application
+import android.content.pm.ActivityInfo
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -9,10 +10,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Snackbar
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.cs501.pantrypal.ui.theme.PantryPalTheme
+import com.cs501.pantrypal.ui.theme.InfoColor
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavType
@@ -23,15 +26,21 @@ import com.cs501.pantrypal.screen.*
 import com.cs501.pantrypal.screen.profilePage.LoginScreen
 import com.cs501.pantrypal.screen.profilePage.ProfileScreen
 import com.cs501.pantrypal.screen.profilePage.RegisterScreen
+import com.cs501.pantrypal.ui.theme.Typography
 import com.cs501.pantrypal.viewmodel.RecipeViewModel
 import com.cs501.pantrypal.viewmodel.UserIngredientsViewModel
-//import com.cs501.pantrypal.viewmodel.UserProfileViewModel
 import com.cs501.pantrypal.viewmodel.UserViewModel
+import com.cs501.pantrypal.viewmodel.GroceryViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        requestedOrientation = if (resources.configuration.screenWidthDp >= 600) {
+            ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+        } else {
+            ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+        }
         setContent {
             PantryPalTheme {
                 AppNavHost()
@@ -44,16 +53,23 @@ class MainActivity : ComponentActivity() {
 fun AppNavHost() {
     val application = LocalContext.current.applicationContext as Application
     val recipeViewModel = remember { RecipeViewModel(application) }
-    //val userProfileViewModel = remember { UserProfileViewModel(application) }
     val userViewModel = remember { UserViewModel(application) }
     val userIngredientsViewModel = remember { UserIngredientsViewModel(application) }
+    val groceryViewModel = remember { GroceryViewModel(application) }
     val navController = rememberNavController()
 
     val snackbarHostState = remember { SnackbarHostState() }
 
     Scaffold(
         bottomBar = { BottomNavigationBar(navController) },
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
+        snackbarHost = { 
+            SnackbarHost(hostState = snackbarHostState) { data ->
+                Snackbar(
+                    snackbarData = data,
+                    containerColor = InfoColor
+                )
+            }
+        }
     ) { paddingValues ->
         NavHost(
             navController,
@@ -67,13 +83,13 @@ fun AppNavHost() {
                 RegisterScreen(userViewModel, navController, snackbarHostState)
             }
             composable("discover") {
-                RecipeSearchScreen(recipeViewModel, navController)
+                RecipeSearchScreen(recipeViewModel, navController, snackbarHostState)
             }
             composable("cookbook") {
                 CookBookScreen(navController, recipeViewModel)
             }
             composable("grocerylist") {
-                GroceryListScreen()
+                GroceryListScreen(groceryViewModel, snackbarHostState)
             }
             composable("profile") {
                 ProfileScreen(userViewModel, navController, snackbarHostState, userIngredientsViewModel)
@@ -81,7 +97,7 @@ fun AppNavHost() {
             composable("detail") { backStack ->
                 recipeViewModel.selectedRecipe?.let {
                     RecipeDetailScreen(recipeViewModel, navController)
-                } ?: Text("No recipe selected")
+                } ?: Text("No recipe selected", style = Typography.displayMedium)
             }
             composable(
                 route = "cookbook_detail/{cookbookName}",
@@ -93,7 +109,6 @@ fun AppNavHost() {
             composable("recipe_detail") {
                 RecipeDetailScreen(viewModel = recipeViewModel, navController = navController)
             }
-
 
         }
     }

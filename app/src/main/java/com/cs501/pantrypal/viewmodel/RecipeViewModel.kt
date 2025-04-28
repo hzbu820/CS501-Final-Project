@@ -39,9 +39,14 @@ class RecipeViewModel(application: Application) : BaseViewModel(application) {
         val database = AppDatabase.getDatabase(application)
         repository = RecipeRepository(database.savedRecipeDao())
         userRepository = UserRepository(database.userDao())
+        
+        viewModelScope.launch {
+            loadSavedRecipes()
+            loadCookbooks()
+        }
     }
 
-    override fun onUserIdChanged(userId: Int) {
+    override fun onUserIdChanged(userId: String) {
         loadSavedRecipes()
     }
     
@@ -51,11 +56,17 @@ class RecipeViewModel(application: Application) : BaseViewModel(application) {
     private fun loadSavedRecipes() {
         viewModelScope.launch {
             val userId = getCurrentUserId()
-            if (userId <= 0) {
+            if (userId == "") {
                 Log.w("PantryPal", "No user logged in, cannot load saved recipes")
                 return@launch
             }
-            repository.getAllRecipesByUserId(getCurrentUserId())
+            try {
+                repository.getAllRecipesByUserId(getCurrentUserId()).collect { recipes ->
+                    _savedRecipes.value = recipes
+                }
+            } catch (e: Exception) {
+                Log.e("PantryPal", "Error loading saved recipes: ${e.message}", e)
+            }
         }
     }
     
@@ -124,7 +135,7 @@ class RecipeViewModel(application: Application) : BaseViewModel(application) {
     fun loadCookbooks() {
         viewModelScope.launch {
             repository.getAllRecipesByUserId(getCurrentUserId()).collect { recipes ->
-                _savedRecipes.value = recipes  // 更新整体数据
+                _savedRecipes.value = recipes
                 _cookbooks.value = recipes.map { it.cookbookName }.distinct()
                 _cookbookRecipeCounts.value = recipes.groupingBy { it.cookbookName }.eachCount()
             }
@@ -143,12 +154,13 @@ class RecipeViewModel(application: Application) : BaseViewModel(application) {
     fun createCookbook(name: String) {
         viewModelScope.launch {
             val userId = getCurrentUserId()
-            if (userId <= 0) {
+            if (userId == "") {
                 Log.w("PantryPal", "Cannot create cookbook: No user logged in")
                 return@launch
             }
 
             // placeholder
+            //TODO: Actually input label image and url
             val placeholder = SavedRecipe(
                 label = "placeholder recipe",
                 image = "",
@@ -211,7 +223,7 @@ class RecipeViewModel(application: Application) : BaseViewModel(application) {
     }
 
     fun Recipe.toSavedRecipe(
-        userId: Int,
+        userId: String,
         isFavorite: Boolean = false,
         cookbookName: String = "default"
     ): SavedRecipe {

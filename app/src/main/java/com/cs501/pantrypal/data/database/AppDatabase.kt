@@ -7,8 +7,8 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 
 @Database(
-    entities = [UserIngredients::class, SavedRecipe::class, User::class],
-    version = 2,
+    entities = [UserIngredients::class, SavedRecipe::class, User::class, GroceryItem::class],
+    version = 1,
     exportSchema = false
 )
 @TypeConverters(StringListConverter::class, IngredientListConverter::class)
@@ -16,6 +16,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun userIngredientsDao(): UserIngredientsDao
     abstract fun savedRecipeDao(): SavedRecipeDao
     abstract fun userDao(): UserDao
+    abstract fun groceryItemDao(): GroceryItemDao
 
     companion object {
         @Volatile

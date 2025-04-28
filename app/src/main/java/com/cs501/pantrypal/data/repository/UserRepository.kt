@@ -7,19 +7,15 @@ import kotlinx.coroutines.flow.Flow
 class UserRepository(private val userDao: UserDao) {
     val allUsers: Flow<List<User>> = userDao.getAllUsers()
     
-    suspend fun getUserById(id: Int): User? {
+    suspend fun getUserById(id: String): User? {
         return userDao.getUserById(id)
     }
     
-    suspend fun getUserByUsername(username: String): User? {
-        return userDao.getUserByUsername(username)
+    suspend fun getUserByEmail(email: String): User? {
+        return userDao.getUserByEmail(email)
     }
     
-    suspend fun login(username: String, password: String): User? {
-        return userDao.login(username, password)
-    }
-    
-    suspend fun registerUser(user: User): Long {
+    suspend fun registerUser(user: User){
         return userDao.insertUser(user)
     }
     

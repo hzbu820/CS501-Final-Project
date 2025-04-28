@@ -16,62 +16,86 @@ import kotlinx.coroutines.launch
 class UserIngredientsViewModel(application: Application) : BaseViewModel(application) {
     private val repository: UserIngredientsRepository
 
+    // StateFlow for current all of the user's ingredients
+    private val _allIngredients = MutableStateFlow<List<UserIngredients>>(emptyList())
+    val allIngredients: StateFlow<List<UserIngredients>> = _allIngredients.asStateFlow()
+
+    // StateFlow for current user's searched ingredients
     private val _ingredients = MutableStateFlow<List<UserIngredients>>(emptyList())
     val ingredients: StateFlow<List<UserIngredients>> = _ingredients.asStateFlow()
 
-    private val _favoriteIngredients = MutableStateFlow<List<UserIngredients>>(emptyList())
-    val favoriteIngredients: StateFlow<List<UserIngredients>> = _favoriteIngredients.asStateFlow()
+    // StateFlow for current user's searched ingredients by barcode
+    private val _ingredientsByBarcode = MutableStateFlow<UserIngredients>(
+        UserIngredients(
+            id = 0,
+            userId = "",
+            name = "",
+            unit = "",
+            expirationDate = "",
+            isFavorite = false
+        )
+    )
+    val ingredientsByBarcode: StateFlow<UserIngredients> = _ingredientsByBarcode.asStateFlow()
 
     init {
         val database = AppDatabase.getDatabase(application)
         repository = UserIngredientsRepository(database.userIngredientsDao())
 
-        viewModelScope.launch {
-            repository.allIngredients.collect { ingredients ->
-                _ingredients.value = ingredients
-            }
-        }
-
-        viewModelScope.launch {
-            repository.favoriteIngredients.collect { favorites ->
-                _favoriteIngredients.value = favorites
-            }
-        }
+        getAllIngredients()
     }
 
-    override fun onUserIdChanged(userId: Int) {
+    override fun onUserIdChanged(userId: String) {
+        getAllIngredients()
+    }
+
+    fun getAllIngredients() {
+        viewModelScope.launch {
+            repository.getAllIngredientsByUserId(getCurrentUserId()).collect { ingredients ->
+                _allIngredients.value = ingredients
+            }
+        }
     }
 
     fun addIngredient(ingredient: UserIngredients) {
         viewModelScope.launch {
             repository.insertIngredient(ingredient)
+            getAllIngredients()
         }
     }
 
     fun updateIngredient(ingredient: UserIngredients) {
         viewModelScope.launch {
             repository.updateIngredient(ingredient)
+            getAllIngredients()
         }
     }
 
     fun deleteIngredient(ingredient: UserIngredients) {
         viewModelScope.launch {
             repository.deleteIngredient(ingredient)
-        }
-    }
-
-    fun toggleFavorite(ingredient: UserIngredients) {
-        viewModelScope.launch {
-            val updatedIngredient = ingredient.copy(isFavorite = !ingredient.isFavorite)
-            repository.updateIngredient(updatedIngredient)
+            getAllIngredients()
         }
     }
 
     fun searchIngredients(query: String) {
         viewModelScope.launch {
-            repository.searchIngredients(query).collect { results ->
+            repository.searchIngredientsByUserId(query,getCurrentUserId()).collect { results ->
                 _ingredients.value = results
             }
         }
+    }
+
+    fun searchIngredientsByApi(query: String) {
+        viewModelScope.launch {
+            repository.searchIngredientsByBarcode(query)
+
+        }
+    }
+
+    fun updateAllIngredients(ingredients: List<UserIngredients>) {
+//        viewModelScope.launch {
+//            repository.updateAllIngredients(ingredients)
+//            getAllIngredients()
+//        }
     }
 }
