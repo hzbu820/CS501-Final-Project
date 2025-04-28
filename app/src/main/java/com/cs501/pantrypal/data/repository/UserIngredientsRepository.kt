@@ -2,6 +2,7 @@ package com.cs501.pantrypal.data.repository
 
 import com.cs501.pantrypal.data.database.UserIngredients
 import com.cs501.pantrypal.data.database.UserIngredientsDao
+import com.cs501.pantrypal.data.model.FoodResponse
 import com.cs501.pantrypal.data.network.ApiClient
 import kotlinx.coroutines.flow.Flow
 
@@ -23,21 +24,30 @@ class UserIngredientsRepository(private val userIngredientsDao: UserIngredientsD
     /**
      * Search ingredients by user ID
      */
-    fun searchIngredientsByUserId(searchQuery: String, userId: String): Flow<List<UserIngredients>> {
+    fun searchIngredientsByUserId(
+        searchQuery: String,
+        userId: String
+    ): Flow<List<UserIngredients>> {
         return userIngredientsDao.searchIngredientsByUserId(searchQuery, userId)
     }
 
     /**
      * Search ingredients by user ID and food category
      */
-    fun searchIngredientsByUserIdAndName(category: String, userId: String): Flow<List<UserIngredients>> {
+    fun searchIngredientsByUserIdAndName(
+        category: String,
+        userId: String
+    ): Flow<List<UserIngredients>> {
         return userIngredientsDao.searchIngredientsByUserIdAndCategory(category, userId)
     }
 
     /**
      * Search ingredients by user ID and expiration date
      */
-    fun searchIngredientsByUserIdAndExpirationDate(expirationDate: String, userId: String): Flow<List<UserIngredients>> {
+    fun searchIngredientsByUserIdAndExpirationDate(
+        expirationDate: String,
+        userId: String
+    ): Flow<List<UserIngredients>> {
         return userIngredientsDao.searchIngredientsByUserIdAndExpirationDate(expirationDate, userId)
     }
 
@@ -65,7 +75,7 @@ class UserIngredientsRepository(private val userIngredientsDao: UserIngredientsD
     /**
      * Search ingredients by Barcode
      */
-    suspend fun searchIngredientsByBarcode(barcode: String) {
+    suspend fun searchIngredientsByBarcode(barcode: String): FoodResponse {
         // Get barcode's length to check if it there should be a leading zero
         val leadingZero = when (barcode.length) {
             12 -> "0"
@@ -73,12 +83,16 @@ class UserIngredientsRepository(private val userIngredientsDao: UserIngredientsD
         }
         // Add leading zero if needed
         val barcode = leadingZero + barcode
-        //TODO: Finish the searchIngredientsByBarcode function once the API is ready
         val response = ApiClient.foodRetrofit.searchIdByCode(barcode = barcode)
-        val foodId = response.foodId
-//        val foodResponse = ApiClient.foodRetrofit.searchFoodById(foodId = foodId)
-//        val food = foodResponse.food
-        return
+        val foodId = response.food_id.value.toLong()
+        val foodResponse = ApiClient.foodRetrofit.searchFoodById(foodId = foodId.toLong())
+        val parsedFoodResponse = foodResponse.copy(
+            food = foodResponse.food.copy(
+                food_name = foodResponse.food.food_name, food_id = foodResponse.food.food_id
+            ), food_images = foodResponse.food_images
+        )
+
+        return parsedFoodResponse
     }
 
 }

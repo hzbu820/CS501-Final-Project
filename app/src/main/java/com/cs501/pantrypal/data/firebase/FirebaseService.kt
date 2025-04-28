@@ -1,11 +1,10 @@
 package com.cs501.pantrypal.data.firebase
 
-import android.util.Log
 import com.cs501.pantrypal.data.database.User
 import com.cs501.pantrypal.data.database.UserIngredients
 import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 
 class FirebaseService {
@@ -22,10 +21,7 @@ class FirebaseService {
                     "password" to user.password,
                 )
 
-                db.collection("users")
-                    .document(user.id.toString())
-                    .set(userMap)
-                    .await()
+                db.collection("users").document(user.id.toString()).set(userMap).await()
 
                 true
             }
@@ -39,21 +35,18 @@ class FirebaseService {
             withContext(Dispatchers.IO) {
                 val batch = db.batch()
 
-                val existingDocs = db.collection("users")
-                    .document(userId.toString())
-                    .collection("ingredients")
-                    .get()
-                    .await()
+                val existingDocs =
+                    db.collection("users").document(userId.toString()).collection("ingredients")
+                        .get().await()
 
                 for (doc in existingDocs) {
                     batch.delete(doc.reference)
                 }
 
                 for (ingredient in ingredients) {
-                    val docRef = db.collection("users")
-                        .document(userId.toString())
-                        .collection("ingredients")
-                        .document(ingredient.id.toString())
+                    val docRef =
+                        db.collection("users").document(userId.toString()).collection("ingredients")
+                            .document(ingredient.id.toString())
 
                     batch.set(docRef, ingredient)
                 }
@@ -70,11 +63,9 @@ class FirebaseService {
     suspend fun restoreUserIngredients(userId: String): List<UserIngredients> {
         return try {
             withContext(Dispatchers.IO) {
-                val querySnapshot = db.collection("users")
-                    .document(userId.toString())
-                    .collection("ingredients")
-                    .get()
-                    .await()
+                val querySnapshot =
+                    db.collection("users").document(userId.toString()).collection("ingredients")
+                        .get().await()
 
                 querySnapshot.documents.mapNotNull { doc ->
                     val data = doc.data
@@ -105,10 +96,8 @@ class FirebaseService {
     suspend fun isEmailNotRegistered(email: String): Boolean {
         return try {
             withContext(Dispatchers.IO) {
-                val querySnapshot = db.collection("users")
-                    .whereEqualTo("email", email)
-                    .get()
-                    .await()
+                val querySnapshot =
+                    db.collection("users").whereEqualTo("email", email).get().await()
 
                 querySnapshot.isEmpty
             }
@@ -120,10 +109,8 @@ class FirebaseService {
     suspend fun getUserByEmail(email: String): User? {
         return try {
             withContext(Dispatchers.IO) {
-                val querySnapshot = db.collection("users")
-                    .whereEqualTo("email", email)
-                    .get()
-                    .await()
+                val querySnapshot =
+                    db.collection("users").whereEqualTo("email", email).get().await()
 
                 if (querySnapshot.isEmpty) null
                 else {
@@ -144,13 +131,10 @@ class FirebaseService {
         }
     }
 
-    suspend fun deleteUserAccount(userId: String, password: String): Boolean {
+    suspend fun deleteUserAccount(userId: String): Boolean {
         return try {
             withContext(Dispatchers.IO) {
-                db.collection("users")
-                    .document(userId)
-                    .delete()
-                    .await()
+                db.collection("users").document(userId).delete().await()
 
                 true
             }
@@ -159,19 +143,32 @@ class FirebaseService {
         }
     }
 
-    suspend fun updateUserPassword(userId: String, oldPassword: String, newPassword: String): Boolean {
+    suspend fun updateUserPassword(
+        userId: String,
+        oldPassword: String,
+        newPassword: String
+    ): Boolean {
         return try {
             withContext(Dispatchers.IO) {
                 val userMap = mapOf(
                     "password" to newPassword
                 )
 
-                db.collection("users")
-                    .document(userId)
-                    .update(userMap)
-                    .await()
+                db.collection("users").document(userId).update(userMap).await()
 
                 true
+            }
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    suspend fun isUserDeleted(userId: String): Boolean {
+        return try {
+            withContext(Dispatchers.IO) {
+                val querySnapshot = db.collection("users").whereEqualTo("id", userId).get().await()
+
+                querySnapshot.isEmpty
             }
         } catch (e: Exception) {
             false

@@ -12,16 +12,17 @@ class PasswordCheck {
         private const val SALT_LENGTH = 16
     }
 
+    fun validatePassword(password: String): Boolean {
+        return password.length >= 8 && password.any { it.isDigit() } && password.any { it.isLetter() }
+    }
+
     fun hashPassword(password: String): String {
         val random = SecureRandom()
         val salt = ByteArray(SALT_LENGTH)
         random.nextBytes(salt)
 
         val spec = PBEKeySpec(
-            password.toCharArray(),
-            salt,
-            ITERATIONS,
-            KEY_LENGTH
+            password.toCharArray(), salt, ITERATIONS, KEY_LENGTH
         )
 
         val factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256")
@@ -42,10 +43,7 @@ class PasswordCheck {
         val hash = Base64.getDecoder().decode(parts[1])
 
         val spec = PBEKeySpec(
-            password.toCharArray(),
-            salt,
-            ITERATIONS,
-            KEY_LENGTH
+            password.toCharArray(), salt, ITERATIONS, KEY_LENGTH
         )
 
         val factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256")

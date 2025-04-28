@@ -27,12 +27,7 @@ class UserIngredientsViewModel(application: Application) : BaseViewModel(applica
     // StateFlow for current user's searched ingredients by barcode
     private val _ingredientsByBarcode = MutableStateFlow<UserIngredients>(
         UserIngredients(
-            id = 0,
-            userId = "",
-            name = "",
-            unit = "",
-            expirationDate = "",
-            isFavorite = false
+            id = 0, userId = "", name = "", unit = "", expirationDate = "", isFavorite = false
         )
     )
     val ingredientsByBarcode: StateFlow<UserIngredients> = _ingredientsByBarcode.asStateFlow()
@@ -79,15 +74,27 @@ class UserIngredientsViewModel(application: Application) : BaseViewModel(applica
 
     fun searchIngredients(query: String) {
         viewModelScope.launch {
-            repository.searchIngredientsByUserId(query,getCurrentUserId()).collect { results ->
+            repository.searchIngredientsByUserId(query, getCurrentUserId()).collect { results ->
                 _ingredients.value = results
             }
         }
     }
 
+    fun setEmptyBarcodeIngredient() {
+        _ingredientsByBarcode.value = UserIngredients(userId = "")
+    }
+
     fun searchIngredientsByApi(query: String) {
         viewModelScope.launch {
-            repository.searchIngredientsByBarcode(query)
+            setEmptyBarcodeIngredient()
+            val foodResponse = repository.searchIngredientsByBarcode(query)
+
+
+            _ingredientsByBarcode.value = UserIngredients(
+                userId = getCurrentUserId(),
+                name = foodResponse.food.food_name,
+                image = foodResponse.food_images?.food_image[0]?.image_url ?: "",
+            )
 
         }
     }

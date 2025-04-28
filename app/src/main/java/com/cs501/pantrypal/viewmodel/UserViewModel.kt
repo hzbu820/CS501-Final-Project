@@ -1,14 +1,8 @@
 package com.cs501.pantrypal.viewmodel
 
 import android.app.Application
-import android.content.Context
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
-import androidx.datastore.preferences.preferencesDataStore
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.cs501.pantrypal.data.database.AppDatabase
 import com.cs501.pantrypal.data.database.User
@@ -17,92 +11,86 @@ import com.cs501.pantrypal.data.repository.UserRepository
 import com.cs501.pantrypal.util.PasswordCheck
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import java.util.UUID
 
 // DataStore to store user preferences
-val Context.userDataStore: DataStore<Preferences> by preferencesDataStore(name = "user_prefs")
 
-class UserViewModel(application: Application) : AndroidViewModel(application) {
+
+class UserViewModel(application: Application) : BaseViewModel(application) {
     private val repository: UserRepository
-    
-    // Current login status
-    private val _isLoggedIn = MutableStateFlow(false)
-    val isLoggedIn: Boolean get() = _isLoggedIn.value
-    
-    // Current user information
+
+
+    // StateFlow for current user information
     private val _currentUser = MutableStateFlow<User?>(null)
     val currentUser: StateFlow<User?> = _currentUser
-    
-    // Key for storing user ID in DataStore
-    private val USER_ID_KEY = stringPreferencesKey("user_id")
-    
-    // DataStore instance
-    private val dataStore = application.userDataStore
-    
+
     init {
-        val database = AppDatabase.getDatabase(application)
+        val database = AppDatabase.getDatabase(getApplication())
         repository = UserRepository(database.userDao())
-        
-        // Check if user is already logged in
+        val currentUserId = getCurrentUserId()
         viewModelScope.launch {
-            dataStore.data.map { preferences ->
-                preferences[USER_ID_KEY]
-            }.collect { userId ->
-                if (userId != null && userId != "") {
-                    val user = repository.getUserById(userId)
-                    if (user != null) {
-                        _currentUser.value = user
-                        _isLoggedIn.value = true
-                    }
-                }
+            _currentUser.value = repository.getUserById(currentUserId)
+        }
+    }
+
+    override fun onUserIdChanged(userId: String) {
+        viewModelScope.launch {
+            val user = repository.getUserById(userId)
+            if (user != null) {
+                setCurrentUserId(user.id)
+                _currentUser.value = user
             }
         }
     }
-    
+
+
     /**
      * Login function
      */
-    suspend fun login(emailAddress: String, password: String): Boolean {
+    suspend fun login(emailAddress: String, password: String): Map<String, Any> {
         val user = repository.getUserByEmail(emailAddress)
         val firebaseUser = FirebaseService().getUserByEmail(emailAddress)
         val passwordCheck = PasswordCheck()
 
-        if(user != null){
+        if (firebaseUser == null) {
+            if (user != null) {
+                repository.deleteUser(user)
+            }
+            return mapOf("success" to false, "message" to "User not found")
+        }
+
+        if (user != null) {
             val isPasswordValid = passwordCheck.verifyPassword(password, user.password)
             if (isPasswordValid) {
-                // Save user ID to DataStore
                 dataStore.edit { preferences ->
-                    preferences[USER_ID_KEY] = user.id
+                    preferences[stringPreferencesKey("user_id")] = user.id
                 }
+                setCurrentUserId(user.id)
                 _currentUser.value = user
-                _isLoggedIn.value = true
-                return true
+                return mapOf("success" to true, "message" to "Login successful")
             } else {
-                return false
+                return mapOf("success" to false, "message" to "Password is incorrect")
             }
         }
 
-        if (firebaseUser != null) {
-            val isPasswordValid = passwordCheck.verifyPassword(password, firebaseUser.password)
-            if (isPasswordValid) {
-                // Save user ID to DataStore
-                dataStore.edit { preferences ->
-                    preferences[USER_ID_KEY] = firebaseUser.id
-                }
-                _currentUser.value = firebaseUser
-                _isLoggedIn.value = true
-                repository.registerUser(firebaseUser)
-                return true
-            }else{
-                return false
+        val isPasswordValid = passwordCheck.verifyPassword(password, firebaseUser.password)
+        if (isPasswordValid) {
+            // Save user ID to DataStore
+            dataStore.edit { preferences ->
+                preferences[stringPreferencesKey("user_id")] = firebaseUser.id
             }
+            setCurrentUserId(firebaseUser.id)
+            _currentUser.value = firebaseUser
+            repository.registerUser(firebaseUser)
+            return mapOf("success" to true, "message" to "Login successful")
+        } else {
+            return mapOf("success" to false, "message" to "Password is incorrect")
         }
 
-        return false
+        return mapOf("success" to false, "message" to "Unknown error")
     }
-    
+
     /**
      * Register function
      */
@@ -123,43 +111,51 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
 
         // Create new user
         val newUser = User(
-            id = id,
-            username = username,
-            password = hashedPassword,
-            email = email
+            id = id, username = username, password = hashedPassword, email = email
         )
         repository.registerUser(newUser)
 
         dataStore.edit { preferences ->
-            preferences[USER_ID_KEY] = newUser.id
+            preferences[stringPreferencesKey("user_id")] = newUser.id
         }
+        setCurrentUserId(newUser.id)
         _currentUser.value = newUser
-        _isLoggedIn.value = true
         // Sync user data with Firebase
         firebaseUser.syncUserData(newUser)
         return true
     }
-    
+
     /**
      * Logout function
      */
     fun logout() {
-        viewModelScope.launch {
-            dataStore.edit { preferences ->
-                preferences.remove(USER_ID_KEY)
-            }
-            _currentUser.value = null
-            _isLoggedIn.value = false
-        }
+        clearUserId()
+        _currentUser.value = null
     }
-    
+
     /**
      * Update user profile information
      */
-    fun updateUserProfile(user: User) {
+    fun updateUserProfile(user: User): Boolean {
         viewModelScope.launch {
             repository.updateUser(user)
+            setCurrentUserId(user.id)
             _currentUser.value = user
         }
+        return true
     }
+
+    /**
+     * Delete user account
+     */
+    fun deleteUserAccount(user: User): Boolean {
+        viewModelScope.launch {
+            repository.deleteUser(user)
+            clearUserId()
+            _currentUser.value = null
+        }
+        return true
+    }
+
+
 }

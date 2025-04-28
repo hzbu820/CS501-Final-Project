@@ -1,24 +1,26 @@
 package com.cs501.pantrypal.data.model
 
-data class FoodResponse (
-    var food: List<Food>,
-    var foodImages: List<FoodImage>
+data class FoodResponse(
+    val food: Food, val food_images: FoodImages? = null
 )
 
 data class Food(
-    var foodId: Long,
-    var foodName: String,
+    val food_id: String, val food_name: String
+
+)
+
+data class FoodImages(
+    val food_image: List<FoodImage>
 )
 
 data class FoodImage(
-    var images: List<Image>
+    val image_url: String, val image_type: String
 )
 
-data class Image(
-    var imageUrl: String,
-    var imageType: String,
+data class FoodIdValue(
+    var value: String
 )
 
 data class FoodIdResponse(
-    var foodId: Long
+    var food_id: FoodIdValue
 )
