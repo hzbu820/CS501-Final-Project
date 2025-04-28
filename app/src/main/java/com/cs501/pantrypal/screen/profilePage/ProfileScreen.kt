@@ -57,6 +57,7 @@ fun ProfileScreen(
     // State for profile image URI
     var profileImageUri by remember { mutableStateOf<Uri?>(null) }
     var showEditOptions by remember { mutableStateOf(false) }
+    var showAddIngredientDialog by remember { mutableStateOf(false) }
 
     // Image picker launcher
     val context = LocalContext.current
@@ -95,27 +96,77 @@ fun ProfileScreen(
         }
     }
 
-    Column(Modifier.fillMaxSize().padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-        ProfileTopBar(userViewModel.isLoggedIn){
-            userViewModel.logout()
-            coroutineScope.launch {
-                snackbarHostState.showSnackbar("Logout successful", duration = SnackbarDuration.Long)
-            }
-            navController.navigate("discover")
-        }
+    if (showAddIngredientDialog) {
+        AddIngredientDialog(
+            userIngredientsViewModel = userIngredientsViewModel,
+            onDismiss = { showAddIngredientDialog = false },
+            snackbarHostState = snackbarHostState
+        )
+    }
 
+    Column(Modifier.fillMaxSize().padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
         if (userViewModel.isLoggedIn && currentUser != null) {
             val user = currentUser!!
 
-            ProfileContent(
-                user = user,
-                profileImageUri = profileImageUri,
-                showEditOptions = showEditOptions,
-                ingredients = ingredients,
-                onToggleEditOptions = { showEditOptions = !showEditOptions },//
-                onSelectImage = { imagePickerLauncher.launch("image/*") },
-                onNavigateToAddIngredient = { navController.navigate("add_ingredient") }
-            )
+            var isSyncing by remember { mutableStateOf(false) }
+
+            BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+                Column(modifier = Modifier.fillMaxSize()) {
+                    ProfileTopBar(userViewModel.isLoggedIn){
+                        userViewModel.logout()
+                        coroutineScope.launch {
+                            snackbarHostState.showSnackbar("Logout successful", duration = SnackbarDuration.Long)
+                        }
+                        navController.navigate("discover")
+                    }
+                    ProfileContent(
+                        user = user,
+                        profileImageUri = profileImageUri,
+                        showEditOptions = showEditOptions,
+                        ingredients = ingredients,
+                        onToggleEditOptions = { showEditOptions = !showEditOptions },
+                        onSelectImage = { imagePickerLauncher.launch("image/*") },
+                        onNavigateToAddIngredient = { showAddIngredientDialog = true },
+                        onSyncClick = {
+                            coroutineScope.launch {
+                                isSyncing = true
+                                try {
+                                    val firebaseService = FirebaseService()
+                                    val ingredientsSynced = firebaseService.restoreUserIngredients(user.id)
+
+                                    userIngredientsViewModel.updateAllIngredients(ingredientsSynced)
+                                    
+                                    isSyncing = false
+                                    
+                                    if (ingredientsSynced != emptyList<UserIngredients>()) {
+                                        snackbarHostState.showSnackbar("Data synced successfully")
+                                    } else {
+                                        snackbarHostState.showSnackbar("Failed to sync data")
+                                    }
+                                } catch (e: Exception) {
+                                    isSyncing = false
+                                    snackbarHostState.showSnackbar("Sync Error: ${e.message}")
+                                }
+                            }
+                        },
+                        navController = navController,
+                        userViewModel = userViewModel
+                    )
+                }
+
+                if (isSyncing) {
+                    Box(
+                        modifier = Modifier
+                            .matchParentSize()
+                            .background(color = Color.Black.copy(alpha = 0.4f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(
+                            color = InfoColor
+                        )
+                    }
+                }
+            }
         } else {
             NotLoggedInContent{ navController.navigate("login") }
         }
