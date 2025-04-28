@@ -24,6 +24,19 @@ class UserIngredientsViewModel(application: Application) : BaseViewModel(applica
     private val _ingredients = MutableStateFlow<List<UserIngredients>>(emptyList())
     val ingredients: StateFlow<List<UserIngredients>> = _ingredients.asStateFlow()
 
+    // StateFlow for current user's searched ingredients by barcode
+    private val _ingredientsByBarcode = MutableStateFlow<UserIngredients>(
+        UserIngredients(
+            id = 0,
+            userId = "",
+            name = "",
+            unit = "",
+            expirationDate = "",
+            isFavorite = false
+        )
+    )
+    val ingredientsByBarcode: StateFlow<UserIngredients> = _ingredientsByBarcode.asStateFlow()
+
     init {
         val database = AppDatabase.getDatabase(application)
         repository = UserIngredientsRepository(database.userIngredientsDao())
@@ -31,7 +44,7 @@ class UserIngredientsViewModel(application: Application) : BaseViewModel(applica
         getAllIngredients()
     }
 
-    override fun onUserIdChanged(userId: Int) {
+    override fun onUserIdChanged(userId: String) {
         getAllIngredients()
     }
 
@@ -70,5 +83,19 @@ class UserIngredientsViewModel(application: Application) : BaseViewModel(applica
                 _ingredients.value = results
             }
         }
+    }
+
+    fun searchIngredientsByApi(query: String) {
+        viewModelScope.launch {
+            repository.searchIngredientsByBarcode(query)
+
+        }
+    }
+
+    fun updateAllIngredients(ingredients: List<UserIngredients>) {
+//        viewModelScope.launch {
+//            repository.updateAllIngredients(ingredients)
+//            getAllIngredients()
+//        }
     }
 }

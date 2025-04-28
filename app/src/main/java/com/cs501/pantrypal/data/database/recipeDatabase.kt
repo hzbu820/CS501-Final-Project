@@ -40,7 +40,7 @@ data class SavedRecipe(
     val calories: Double,
     val isFavorite: Boolean = false,
     val dateAdded: Long = System.currentTimeMillis(),
-    val userId: Int = -1,
+    val userId: String = "",
     val cookbookName: String = "default"
 )
 
@@ -62,7 +62,7 @@ interface SavedRecipeDao {
     fun getAllRecipes(): Flow<List<SavedRecipe>>
     
     @Query("SELECT * FROM saved_recipes WHERE userId = :userId ORDER BY dateAdded DESC")
-    fun getRecipesByUserId(userId: Int): Flow<List<SavedRecipe>>
+    fun getRecipesByUserId(userId: String): Flow<List<SavedRecipe>>
     
     @Query("SELECT * FROM saved_recipes WHERE id = :id")
     suspend fun getRecipeById(id: Int): SavedRecipe?
@@ -86,7 +86,7 @@ interface SavedRecipeDao {
     fun getFavoriteRecipes(): Flow<List<SavedRecipe>>
     
     @Query("SELECT * FROM saved_recipes WHERE isFavorite = 1 AND userId = :userId")
-    fun getFavoriteRecipesByUser(userId: Int): Flow<List<SavedRecipe>>
+    fun getFavoriteRecipesByUser(userId: String): Flow<List<SavedRecipe>>
 
     @Query("SELECT * FROM saved_recipes WHERE cookbookName = :cookbookName")
     fun getRecipesByCookbook(cookbookName: String): Flow<List<SavedRecipe>>

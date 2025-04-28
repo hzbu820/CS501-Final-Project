@@ -7,14 +7,15 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Snackbar
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.cs501.pantrypal.ui.theme.PantryPalTheme
+import com.cs501.pantrypal.ui.theme.InfoColor
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavType
@@ -22,14 +23,12 @@ import androidx.navigation.compose.*
 import androidx.navigation.navArgument
 import com.cs501.pantrypal.navigation.BottomNavigationBar
 import com.cs501.pantrypal.screen.*
-import com.cs501.pantrypal.screen.profilePage.AddIngredientScreen
 import com.cs501.pantrypal.screen.profilePage.LoginScreen
 import com.cs501.pantrypal.screen.profilePage.ProfileScreen
 import com.cs501.pantrypal.screen.profilePage.RegisterScreen
 import com.cs501.pantrypal.ui.theme.Typography
 import com.cs501.pantrypal.viewmodel.RecipeViewModel
 import com.cs501.pantrypal.viewmodel.UserIngredientsViewModel
-//import com.cs501.pantrypal.viewmodel.UserProfileViewModel
 import com.cs501.pantrypal.viewmodel.UserViewModel
 import com.cs501.pantrypal.viewmodel.GroceryViewModel
 
@@ -63,7 +62,14 @@ fun AppNavHost() {
 
     Scaffold(
         bottomBar = { BottomNavigationBar(navController) },
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
+        snackbarHost = { 
+            SnackbarHost(hostState = snackbarHostState) { data ->
+                Snackbar(
+                    snackbarData = data,
+                    containerColor = InfoColor
+                )
+            }
+        }
     ) { paddingValues ->
         NavHost(
             navController,
@@ -104,9 +110,6 @@ fun AppNavHost() {
                 RecipeDetailScreen(viewModel = recipeViewModel, navController = navController)
             }
 
-            composable("add_ingredient") {
-                AddIngredientScreen(userIngredientsViewModel, navController, snackbarHostState)
-            }
         }
     }
 }

@@ -12,14 +12,14 @@ class RecipeRepository(private val savedRecipeDao: SavedRecipeDao) {
     /**
      * Get all saved recipes by user ID
      */
-    fun getAllRecipesByUserId(userId: Int): Flow<List<SavedRecipe>> {
+    fun getAllRecipesByUserId(userId: String): Flow<List<SavedRecipe>> {
         return savedRecipeDao.getRecipesByUserId(userId)
     }
     
     /**
      * Get all favorite recipes by user ID
      */
-    fun getFavoriteRecipesByUser(userId: Int): Flow<List<SavedRecipe>> {
+    fun getFavoriteRecipesByUser(userId: String): Flow<List<SavedRecipe>> {
         return savedRecipeDao.getFavoriteRecipesByUser(userId)
     }
 
@@ -53,7 +53,7 @@ class RecipeRepository(private val savedRecipeDao: SavedRecipeDao) {
      * Get a recipe from the Api
      */
     suspend fun searchRecipesFromApi(query: String): List<Recipe> {
-        val response = ApiClient.retrofit.searchRecipes(ingredients = query)
+        val response = ApiClient.edamamRetrofit.searchRecipes(ingredients = query)
         return response.hits.map { it.recipe }
     }
 
