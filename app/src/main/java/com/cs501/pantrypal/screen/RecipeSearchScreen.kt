@@ -17,12 +17,14 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.cs501.pantrypal.ui.theme.InfoColor
 import com.cs501.pantrypal.ui.theme.PrimaryLight
 import com.cs501.pantrypal.ui.theme.Typography
+import com.cs501.pantrypal.util.ShakeSensorManager
 import com.cs501.pantrypal.viewmodel.RecipeViewModel
 import kotlinx.coroutines.launch
 
@@ -34,6 +36,26 @@ fun RecipeSearchScreen(viewModel: RecipeViewModel, navController: NavController,
     var ingredients by remember { mutableStateOf(listOf("")) }
     val maxIngredients = 5
     var showShakeInfo by remember { mutableStateOf(false) }
+    
+    // Set up shake detection
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+    val shakeSensorManager = remember { ShakeSensorManager(context) }
+    
+    // Register and unregister the sensor when the composable enters/leaves composition
+    DisposableEffect(shakeSensorManager) {
+        shakeSensorManager.setOnShakeListener {
+            coroutineScope.launch {
+                viewModel.getRandomRecipes()
+                snackbarHostState.showSnackbar(message = "Shake detected! Finding recipes with your pantry ingredients...", duration = SnackbarDuration.Short)
+            }
+        }
+        shakeSensorManager.register()
+        
+        onDispose {
+            shakeSensorManager.unregister()
+        }
+    }
 
     if (isTablet) {
         TabletRecipeSearchLayout(
@@ -59,6 +81,20 @@ fun RecipeSearchScreen(viewModel: RecipeViewModel, navController: NavController,
         )
     }
 
+    if (showShakeInfo) {
+        AlertDialog(
+            onDismissRequest = { showShakeInfo = false },
+            title = { Text("Shake for Surprise") },
+            text = {
+                Text("Shake your device to get recipe suggestions based on ingredients from your pantry! If your pantry is empty, we'll use trending ingredients instead. Perfect when you're not sure what to cook with what you have on hand.")
+            },
+            confirmButton = {
+                TextButton(onClick = { showShakeInfo = false }) {
+                    Text("Got it!")
+                }
+            }
+        )
+    }
 }
 
 @Composable
@@ -138,33 +174,29 @@ fun TabletRecipeSearchLayout(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-//                Box {
-//                    Button(
-//                        onClick = {
-//                            coroutineScope.launch {
-//                                snackbarHostState.showSnackbar(message = "Function Not Yet Implemented", duration = SnackbarDuration.Long)
-//                            }
-//                        },
-//                        modifier = Modifier.fillMaxWidth()
-//                    ) {
-//                        Text("Shake for Surprise", style = MaterialTheme.typography.labelLarge)
-//                    }
-//
-//                    IconButton(
-//                        onClick = { onShowShakeInfoChange(true) },
-//                        modifier = Modifier
-//                            .size(24.dp)
-//                            .align(Alignment.TopEnd)
-//                            .offset(x = 8.dp, y = (-8).dp)
-//                    ) {
-//                        Icon(
-//                            Icons.Default.Info,
-//                            contentDescription = "Information",
-//                            tint = InfoColor,
-//                            modifier = Modifier.size(16.dp)
-//                        )
-//                    }
-//                }
+                Box {
+                    Button(
+                        onClick = { viewModel.getRandomRecipes() },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Shake for Pantry Recipes", style = MaterialTheme.typography.labelLarge)
+                    }
+
+                    IconButton(
+                        onClick = { onShowShakeInfoChange(true) },
+                        modifier = Modifier
+                            .size(24.dp)
+                            .align(Alignment.TopEnd)
+                            .offset(x = 8.dp, y = (-8).dp)
+                    ) {
+                        Icon(
+                            Icons.Default.Info,
+                            contentDescription = "Information",
+                            tint = InfoColor,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+                }
             }
         }
 
@@ -289,31 +321,26 @@ fun PhoneRecipeSearchLayout(
 
             Spacer(modifier = Modifier.width(16.dp))
 
-//            Box {
-//                Button(onClick = {
-//                    coroutineScope.launch {
-//                        snackbarHostState.showSnackbar(message = "Function Not Yet Implemented", duration = SnackbarDuration.Long)
-//                    }
-//
-//                }) {
-//                    Text("Shake for Surprise", style = MaterialTheme.typography.labelLarge)
-//                }
-//
-//                IconButton(
-//                    onClick = { onShowShakeInfoChange(true) },
-//                    modifier = Modifier
-//                        .size(24.dp)
-//                        .align(Alignment.TopEnd)
-//                        .offset(x = 8.dp, y = (-8).dp)
-//                ) {
-//                    Icon(
-//                        Icons.Default.Info,
-//                        contentDescription = "Information",
-//                        tint = InfoColor,
-//                        modifier = Modifier.size(16.dp)
-//                    )
-//                }
-//            }
+            Box {
+                Button(onClick = { viewModel.getRandomRecipes() }) {
+                    Text("Shake for Pantry Recipes", style = MaterialTheme.typography.labelLarge)
+                }
+
+                IconButton(
+                    onClick = { onShowShakeInfoChange(true) },
+                    modifier = Modifier
+                        .size(24.dp)
+                        .align(Alignment.TopEnd)
+                        .offset(x = 8.dp, y = (-8).dp)
+                ) {
+                    Icon(
+                        Icons.Default.Info,
+                        contentDescription = "Information",
+                        tint = InfoColor,
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+            }
         }
 
         if (viewModel.isLoading) {
