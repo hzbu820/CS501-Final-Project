@@ -115,7 +115,6 @@ class FirebaseService {
                     val data = doc.data
                     if (data != null) {
                         UserIngredients(
-                            id = (data["id"] as Long).toInt(),
                             name = data["name"] as String,
                             foodCategory = data["foodCategory"] as String,
                             image = data["image"] as String,
@@ -124,7 +123,7 @@ class FirebaseService {
                             expirationDate = data["expirationDate"] as String,
                             location = data["location"] as String,
                             notes = data["notes"] as String,
-                            isFavorite = data["isFavorite"] as Boolean,
+                            isFavorite = data["favorite"] as Boolean,
                             userId = (data["userId"] as String)
                         )
 
@@ -219,7 +218,6 @@ class FirebaseService {
 
     suspend fun updateUserPassword(
         userId: String,
-        oldPassword: String,
         newPassword: String
     ): Boolean {
         return try {

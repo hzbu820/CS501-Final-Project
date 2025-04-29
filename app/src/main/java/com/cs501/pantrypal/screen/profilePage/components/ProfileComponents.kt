@@ -439,7 +439,7 @@ fun EditOptionsCard(
                         val firebaseService = FirebaseService()
                         val newUserData = user.copy(password = passwordCheck.hashPassword(newPassword))
                         val localResult = userViewModel.updateUserProfile(newUserData)
-                        val remoteResult = firebaseService.updateUserPassword(user.id, currentPassword, newPassword)
+                        val remoteResult = firebaseService.updateUserPassword(user.id, newPassword)
                         isChangingPassword = false
 
                         if (localResult && remoteResult) {
