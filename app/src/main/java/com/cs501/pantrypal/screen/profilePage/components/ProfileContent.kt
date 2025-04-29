@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavController
 import com.cs501.pantrypal.data.database.User
 import com.cs501.pantrypal.data.database.UserIngredients
+import com.cs501.pantrypal.viewmodel.RecipeViewModel
 import com.cs501.pantrypal.viewmodel.UserViewModel
 
 @Composable
@@ -20,6 +21,7 @@ fun ProfileContent(
     onSyncClick: () -> Unit = {},
     navController: NavController,
     userViewModel: UserViewModel,
+    recipeViewModel: RecipeViewModel,
     snackbarHostState: SnackbarHostState
 ) {
     // User Info Section
@@ -27,7 +29,7 @@ fun ProfileContent(
 
     // Edit User Info Section
     if (showEditOptions) {
-        EditOptionsCard(user, ingredients, navController, userViewModel, snackbarHostState )
+        EditOptionsCard(user, ingredients, navController, userViewModel, recipeViewModel, snackbarHostState )
     }
 
     // User Pantry Section

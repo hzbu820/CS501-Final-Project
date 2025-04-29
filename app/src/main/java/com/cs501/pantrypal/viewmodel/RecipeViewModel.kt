@@ -235,6 +235,10 @@ class RecipeViewModel(application: Application) : BaseViewModel(application) {
         }
     }
 
+    suspend fun isRecipeInCookbook(url: String, cookbookName: String): Boolean {
+        return repository.isRecipeInCookbook(url, cookbookName)
+    }
+
     fun createCookbook(name: String) {
         viewModelScope.launch {
             val userId = getCurrentUserId()
@@ -281,7 +285,7 @@ class RecipeViewModel(application: Application) : BaseViewModel(application) {
         return savedRecipeUrls.value.contains(recipe.uri ?: "")
     }
 
-    fun saveRecipeToCookbook(recipe: Recipe, cookbookName: String = "default", isFavorite: Boolean = false) {
+    fun saveRecipeToCookbook(recipe: Recipe, cookbookName: String = "Default", isFavorite: Boolean = false) {
         if (!isUserLoggedIn()) {
             Log.w("PantryPal", "Cannot save recipe: No user logged in")
             return
@@ -332,7 +336,15 @@ class RecipeViewModel(application: Application) : BaseViewModel(application) {
         )
     }
 
+    fun updateAllRecipes(recipes: List<SavedRecipe>, userId: String) {
+        viewModelScope.launch {
+            repository.deleteAllRecipesByUserId(userId)
+            repository.updateAllRecipes(recipes)
+        }
+    }
 
-
+    fun getAllSavedRecipes(): List<SavedRecipe> {
+        return _savedRecipes.value
+    }
 
 }

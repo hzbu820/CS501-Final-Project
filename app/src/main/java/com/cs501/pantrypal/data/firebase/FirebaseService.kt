@@ -1,5 +1,6 @@
 package com.cs501.pantrypal.data.firebase
 
+import com.cs501.pantrypal.data.database.SavedRecipe
 import com.cs501.pantrypal.data.database.User
 import com.cs501.pantrypal.data.database.UserIngredients
 import com.google.firebase.firestore.FirebaseFirestore
@@ -60,6 +61,49 @@ class FirebaseService {
         }
     }
 
+    suspend fun syncRecipes(recipes: List<SavedRecipe>, userId: String): Boolean {
+        return try {
+            withContext(Dispatchers.IO) {
+                val batch = db.batch()
+
+                val existingDocs =
+                    db.collection("users").document(userId.toString()).collection("recipes")
+                        .get().await()
+
+                for (doc in existingDocs) {
+                    batch.delete(doc.reference)
+                }
+
+                for (recipe in recipes) {
+                    val docRef =
+                        db.collection("users").document(userId.toString()).collection("recipes")
+                            .document(recipe.id.toString())
+
+                    val recipeMap = mapOf(
+                        "id" to recipe.id,
+                        "label" to recipe.label,
+                        "image" to recipe.image,
+                        "url" to recipe.url,
+                        "ingredientLines" to recipe.ingredientLines,
+                        "calories" to recipe.calories,
+                        "isFavorite" to recipe.isFavorite,
+                        "dateAdded" to recipe.dateAdded,
+                        "userId" to recipe.userId,
+                        "cookbookName" to recipe.cookbookName
+                    )
+
+                    batch.set(docRef, recipeMap)
+                }
+
+                batch.commit().await()
+
+                true
+            }
+        } catch (e: Exception) {
+            false
+        }
+    }
+
     suspend fun restoreUserIngredients(userId: String): List<UserIngredients> {
         return try {
             withContext(Dispatchers.IO) {
@@ -86,6 +130,36 @@ class FirebaseService {
 
                     } else null
 
+                }
+            }
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+
+    suspend fun restoreRecipes(userId: String): List<SavedRecipe> {
+        return try {
+            withContext(Dispatchers.IO) {
+                val querySnapshot =
+                    db.collection("users").document(userId.toString()).collection("recipes")
+                        .get().await()
+
+                querySnapshot.documents.mapNotNull { doc ->
+                    val data = doc.data
+                    if (data != null) {
+                        SavedRecipe(
+                            id = (data["id"] as Long).toInt(),
+                            label = data["label"] as String,
+                            image = data["image"] as String,
+                            url = data["url"] as String,
+                            ingredientLines = (data["ingredientLines"] as List<*>).map { it as String },
+                            calories = (data["calories"] as Number).toDouble(),
+                            isFavorite = data["isFavorite"] as Boolean,
+                            dateAdded = data["dateAdded"] as Long,
+                            userId = data["userId"] as String,
+                            cookbookName = data["cookbookName"] as String
+                        )
+                    } else null
                 }
             }
         } catch (e: Exception) {

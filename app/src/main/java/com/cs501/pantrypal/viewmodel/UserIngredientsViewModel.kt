@@ -100,9 +100,9 @@ class UserIngredientsViewModel(application: Application) : BaseViewModel(applica
     }
 
     fun updateAllIngredients(ingredients: List<UserIngredients>) {
-//        viewModelScope.launch {
-//            repository.updateAllIngredients(ingredients)
-//            getAllIngredients()
-//        }
+        viewModelScope.launch {
+            repository.deleteAllIngredientsByUserId(getCurrentUserId())
+            repository.updateAllIngredients(ingredients)
+        }
     }
 }

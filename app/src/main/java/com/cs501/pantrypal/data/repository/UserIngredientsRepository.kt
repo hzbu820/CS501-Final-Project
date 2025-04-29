@@ -95,4 +95,13 @@ class UserIngredientsRepository(private val userIngredientsDao: UserIngredientsD
         return parsedFoodResponse
     }
 
+    suspend fun deleteAllIngredientsByUserId(userId: String) {
+        userIngredientsDao.deleteAllIngredientsByUserId(userId)
+    }
+
+    suspend fun updateAllIngredients(ingredients: List<UserIngredients>) {
+        for( ingredient in ingredients) {
+            userIngredientsDao.insertIngredient(ingredient)
+        }
+    }
 }

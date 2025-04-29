@@ -23,6 +23,7 @@ import com.cs501.pantrypal.data.database.UserIngredients
 import com.cs501.pantrypal.data.firebase.FirebaseService
 import com.cs501.pantrypal.ui.theme.*
 import com.cs501.pantrypal.util.PasswordCheck
+import com.cs501.pantrypal.viewmodel.RecipeViewModel
 import com.cs501.pantrypal.viewmodel.UserViewModel
 import kotlinx.coroutines.launch
 
@@ -348,6 +349,7 @@ fun EditOptionsCard(
     ingredients: List<UserIngredients>,
     navController: NavController,
     userViewModel: UserViewModel,
+    recipeViewModel: RecipeViewModel,
     snackbarHostState: SnackbarHostState
 ) {
     val coroutineScope = rememberCoroutineScope()
@@ -471,11 +473,13 @@ fun EditOptionsCard(
                         isSyncingToCloud = true
                         try {
                             val firebaseService = FirebaseService()
-                            val syncResult = firebaseService.syncUserIngredients(ingredients, user.id)
-                            val userSynced = firebaseService.syncUserData(user)
+                            val ingredientsResult = firebaseService.syncUserIngredients(ingredients, user.id)
+                            val userResult = firebaseService.syncUserData(user)
+                            val savedRecipes = recipeViewModel.getAllSavedRecipes()
+                            val cookbookResult = firebaseService.syncRecipes(savedRecipes, user.id)
                             isSyncingToCloud = false
                             
-                            if (syncResult && userSynced) {
+                            if (userResult && ingredientsResult && cookbookResult) {
                                 snackbarHostState.showSnackbar("Data synced successfully")
                             } else {
                                 snackbarHostState.showSnackbar("Data sync failed")

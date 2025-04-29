@@ -44,5 +44,8 @@ interface UserIngredientsDao {
 
     @Query("SELECT * FROM user_ingredients WHERE userId = :userId AND name LIKE '%' || '%' AND expirationDate = :expirationDate ORDER BY name ASC")
     fun searchIngredientsByUserIdAndExpirationDate(expirationDate: String, userId: String): Flow<List<UserIngredients>>
+
+    @Query("DELETE FROM user_ingredients WHERE userId = :userId")
+    suspend fun deleteAllIngredientsByUserId(userId: String): Int
 }
 

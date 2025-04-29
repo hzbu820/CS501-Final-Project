@@ -71,5 +71,15 @@ class RecipeRepository(private val savedRecipeDao: SavedRecipeDao) {
         return savedRecipeDao.isRecipeInCookbook(url, cookbookName) != null
     }
 
+    suspend fun updateAllRecipes(recipes: List<SavedRecipe>) {
+        for(recipe in recipes) {
+            savedRecipeDao.insertRecipe(recipe)
+        }
+    }
+
+    suspend fun deleteAllRecipesByUserId(userId: String) {
+        savedRecipeDao.deleteAllRecipesByUserId(userId)
+    }
+
 
 }

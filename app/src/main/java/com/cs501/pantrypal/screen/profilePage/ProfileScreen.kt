@@ -20,6 +20,7 @@ import com.cs501.pantrypal.screen.profilePage.components.NotLoggedInContent
 import com.cs501.pantrypal.screen.profilePage.components.ProfileContent
 import com.cs501.pantrypal.screen.profilePage.components.ProfileTopBar
 import com.cs501.pantrypal.ui.theme.InfoColor
+import com.cs501.pantrypal.viewmodel.RecipeViewModel
 import com.cs501.pantrypal.viewmodel.UserIngredientsViewModel
 import com.cs501.pantrypal.viewmodel.UserViewModel
 import kotlinx.coroutines.launch
@@ -31,7 +32,8 @@ fun ProfileScreen(
     userViewModel: UserViewModel,
     navController: NavController,
     snackbarHostState: SnackbarHostState,
-    userIngredientsViewModel: UserIngredientsViewModel
+    userIngredientsViewModel: UserIngredientsViewModel,
+    recipesViewModel: RecipeViewModel
 ) {
     val currentUser by userViewModel.currentUser.collectAsState()
     val ingredients by userIngredientsViewModel.allIngredients.collectAsState()
@@ -120,10 +122,12 @@ fun ProfileScreen(
                                 isSyncing = true
                                 try {
                                     val firebaseService = FirebaseService()
-                                    val ingredientsSynced =
-                                        firebaseService.restoreUserIngredients(user.id)
+                                    val ingredientsSynced = firebaseService.restoreUserIngredients(user.id)
+                                    val recipesSynced = firebaseService.restoreRecipes(user.id)
 
                                     userIngredientsViewModel.updateAllIngredients(ingredientsSynced)
+
+                                    recipesViewModel.updateAllRecipes(recipesSynced, user.id)
 
                                     isSyncing = false
 
@@ -140,6 +144,7 @@ fun ProfileScreen(
                         },
                         navController = navController,
                         userViewModel = userViewModel,
+                        recipeViewModel = recipesViewModel,
                         snackbarHostState = snackbarHostState
                     )
                 }
