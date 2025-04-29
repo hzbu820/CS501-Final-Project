@@ -82,8 +82,8 @@ class UserIngredientsRepository(private val userIngredientsDao: UserIngredientsD
             else -> ""
         }
         // Add leading zero if needed
-        val barcode = leadingZero + barcode
-        val response = ApiClient.foodRetrofit.searchIdByCode(barcode = barcode)
+        val formattedBarcode = leadingZero + barcode
+        val response = ApiClient.foodRetrofit.searchIdByCode(barcode = formattedBarcode)
         val foodId = response.food_id.value.toLong()
         val foodResponse = ApiClient.foodRetrofit.searchFoodById(foodId = foodId.toLong())
         val parsedFoodResponse = foodResponse.copy(
