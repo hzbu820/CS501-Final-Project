@@ -76,9 +76,12 @@ fun CookBookScreen(
     val recipeCounts by viewModel.cookbookRecipeCounts.collectAsState()
     var searchQuery by remember { mutableStateOf("") }
     var selectedCookbook by remember { mutableStateOf<String?>(null) }
+    var isLoading by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
+        isLoading = true
         viewModel.loadCookbooks()
+        isLoading = false
     }
 
     // Load recipes when a cookbook is selected
@@ -90,41 +93,54 @@ fun CookBookScreen(
     val configuration = LocalConfiguration.current
     val isTablet = configuration.screenWidthDp >= 600
 
-    if (isTablet) {
-        // Tablet layout with sidebar
-        TabletCookBookLayout(
-            cookbooks = cookbooks,
-            recipeCounts = recipeCounts,
-            searchQuery = searchQuery,
-            selectedCookbook = selectedCookbook,
-            navController = navController,
-            viewModel = viewModel,
-            onSearchQueryChange = { searchQuery = it },
-            onClearSearch = { searchQuery = "" },
-            onCookbookSelect = { selectedCookbook = it },
-            onDeleteCookbook = { viewModel.deleteCookbook(it) },
-            onShowAddDialog = { showDialog = true })
-    } else {
-        // Phone layout
-        Column(modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)) {
-            // Top Header
-            CookBookScreenHeader()
+    // Show loading indicator if data is being loaded
+    if (isLoading) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text(
+                text = "Loading...",
+                style = Typography.bodyLarge,
+                color = TextPrimaryLight
+            )
+        }
+        return
+    }else {
+        if (isTablet) {
+            // Tablet layout with sidebar
+            TabletCookBookLayout(
+                cookbooks = cookbooks,
+                recipeCounts = recipeCounts,
+                searchQuery = searchQuery,
+                selectedCookbook = selectedCookbook,
+                navController = navController,
+                viewModel = viewModel,
+                onSearchQueryChange = { searchQuery = it },
+                onClearSearch = { searchQuery = "" },
+                onCookbookSelect = { selectedCookbook = it },
+                onDeleteCookbook = { viewModel.deleteCookbook(it) },
+                onShowAddDialog = { showDialog = true })
+        } else {
+            // Phone layout
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp)
+            ) {
+                // Top Header
+                CookBookScreenHeader()
 
-            Box(modifier = Modifier.fillMaxSize()) {
-                if (cookbooks.isEmpty()) {
-                    EmptyCookBookState()
-                } else {
-                    CookBookList(cookbooks, recipeCounts, navController, viewModel)
+                Box(modifier = Modifier.fillMaxSize()) {
+                    if (cookbooks.isEmpty()) {
+                        EmptyCookBookState()
+                    } else {
+                        CookBookList(cookbooks, recipeCounts, navController, viewModel)
+                    }
+
+                    // Floating Action Button to add a new cookbook
+                    AddCookBookButton(Modifier.align(Alignment.BottomEnd)) { showDialog = true }
                 }
-
-                // Floating Action Button to add a new cookbook
-                AddCookBookButton(Modifier.align(Alignment.BottomEnd)) { showDialog = true }
             }
         }
     }
-
     // Add Cookbook Dialog
     if (showDialog) {
         AddCookBookDialog(
@@ -219,7 +235,7 @@ fun CookBookItem(
                     .clickable(onClick = onItemClick)
             ) {
                 Text(
-                    text = cookbookName, style = Typography.titleLarge, color = TextSecondary
+                    text = cookbookName, style = Typography.titleLarge
                 )
                 Text(
                     text = "$recipeCount recipes",

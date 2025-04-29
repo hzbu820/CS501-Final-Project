@@ -92,7 +92,7 @@ fun AppNavHost() {
                 GroceryListScreen(groceryViewModel, snackbarHostState)
             }
             composable("profile") {
-                ProfileScreen(userViewModel, navController, snackbarHostState, userIngredientsViewModel)
+                ProfileScreen(userViewModel, navController, snackbarHostState, userIngredientsViewModel, recipeViewModel)
             }
             composable("detail") { backStack ->
                 recipeViewModel.selectedRecipe?.let {

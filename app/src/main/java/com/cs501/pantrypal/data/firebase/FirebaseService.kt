@@ -1,11 +1,11 @@
 package com.cs501.pantrypal.data.firebase
 
-import android.util.Log
+import com.cs501.pantrypal.data.database.SavedRecipe
 import com.cs501.pantrypal.data.database.User
 import com.cs501.pantrypal.data.database.UserIngredients
 import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 
 class FirebaseService {
@@ -22,10 +22,7 @@ class FirebaseService {
                     "password" to user.password,
                 )
 
-                db.collection("users")
-                    .document(user.id.toString())
-                    .set(userMap)
-                    .await()
+                db.collection("users").document(user.id.toString()).set(userMap).await()
 
                 true
             }
@@ -39,23 +36,63 @@ class FirebaseService {
             withContext(Dispatchers.IO) {
                 val batch = db.batch()
 
-                val existingDocs = db.collection("users")
-                    .document(userId.toString())
-                    .collection("ingredients")
-                    .get()
-                    .await()
+                val existingDocs =
+                    db.collection("users").document(userId.toString()).collection("ingredients")
+                        .get().await()
 
                 for (doc in existingDocs) {
                     batch.delete(doc.reference)
                 }
 
                 for (ingredient in ingredients) {
-                    val docRef = db.collection("users")
-                        .document(userId.toString())
-                        .collection("ingredients")
-                        .document(ingredient.id.toString())
+                    val docRef =
+                        db.collection("users").document(userId.toString()).collection("ingredients")
+                            .document(ingredient.id.toString())
 
                     batch.set(docRef, ingredient)
+                }
+
+                batch.commit().await()
+
+                true
+            }
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    suspend fun syncRecipes(recipes: List<SavedRecipe>, userId: String): Boolean {
+        return try {
+            withContext(Dispatchers.IO) {
+                val batch = db.batch()
+
+                val existingDocs =
+                    db.collection("users").document(userId.toString()).collection("recipes")
+                        .get().await()
+
+                for (doc in existingDocs) {
+                    batch.delete(doc.reference)
+                }
+
+                for (recipe in recipes) {
+                    val docRef =
+                        db.collection("users").document(userId.toString()).collection("recipes")
+                            .document(recipe.id.toString())
+
+                    val recipeMap = mapOf(
+                        "id" to recipe.id,
+                        "label" to recipe.label,
+                        "image" to recipe.image,
+                        "url" to recipe.url,
+                        "ingredientLines" to recipe.ingredientLines,
+                        "calories" to recipe.calories,
+                        "isFavorite" to recipe.isFavorite,
+                        "dateAdded" to recipe.dateAdded,
+                        "userId" to recipe.userId,
+                        "cookbookName" to recipe.cookbookName
+                    )
+
+                    batch.set(docRef, recipeMap)
                 }
 
                 batch.commit().await()
@@ -70,11 +107,9 @@ class FirebaseService {
     suspend fun restoreUserIngredients(userId: String): List<UserIngredients> {
         return try {
             withContext(Dispatchers.IO) {
-                val querySnapshot = db.collection("users")
-                    .document(userId.toString())
-                    .collection("ingredients")
-                    .get()
-                    .await()
+                val querySnapshot =
+                    db.collection("users").document(userId.toString()).collection("ingredients")
+                        .get().await()
 
                 querySnapshot.documents.mapNotNull { doc ->
                     val data = doc.data
@@ -102,13 +137,41 @@ class FirebaseService {
         }
     }
 
+    suspend fun restoreRecipes(userId: String): List<SavedRecipe> {
+        return try {
+            withContext(Dispatchers.IO) {
+                val querySnapshot =
+                    db.collection("users").document(userId.toString()).collection("recipes")
+                        .get().await()
+
+                querySnapshot.documents.mapNotNull { doc ->
+                    val data = doc.data
+                    if (data != null) {
+                        SavedRecipe(
+                            id = (data["id"] as Long).toInt(),
+                            label = data["label"] as String,
+                            image = data["image"] as String,
+                            url = data["url"] as String,
+                            ingredientLines = (data["ingredientLines"] as List<*>).map { it as String },
+                            calories = (data["calories"] as Number).toDouble(),
+                            isFavorite = data["isFavorite"] as Boolean,
+                            dateAdded = data["dateAdded"] as Long,
+                            userId = data["userId"] as String,
+                            cookbookName = data["cookbookName"] as String
+                        )
+                    } else null
+                }
+            }
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+
     suspend fun isEmailNotRegistered(email: String): Boolean {
         return try {
             withContext(Dispatchers.IO) {
-                val querySnapshot = db.collection("users")
-                    .whereEqualTo("email", email)
-                    .get()
-                    .await()
+                val querySnapshot =
+                    db.collection("users").whereEqualTo("email", email).get().await()
 
                 querySnapshot.isEmpty
             }
@@ -120,10 +183,8 @@ class FirebaseService {
     suspend fun getUserByEmail(email: String): User? {
         return try {
             withContext(Dispatchers.IO) {
-                val querySnapshot = db.collection("users")
-                    .whereEqualTo("email", email)
-                    .get()
-                    .await()
+                val querySnapshot =
+                    db.collection("users").whereEqualTo("email", email).get().await()
 
                 if (querySnapshot.isEmpty) null
                 else {
@@ -144,13 +205,10 @@ class FirebaseService {
         }
     }
 
-    suspend fun deleteUserAccount(userId: String, password: String): Boolean {
+    suspend fun deleteUserAccount(userId: String): Boolean {
         return try {
             withContext(Dispatchers.IO) {
-                db.collection("users")
-                    .document(userId)
-                    .delete()
-                    .await()
+                db.collection("users").document(userId).delete().await()
 
                 true
             }
@@ -159,19 +217,32 @@ class FirebaseService {
         }
     }
 
-    suspend fun updateUserPassword(userId: String, oldPassword: String, newPassword: String): Boolean {
+    suspend fun updateUserPassword(
+        userId: String,
+        oldPassword: String,
+        newPassword: String
+    ): Boolean {
         return try {
             withContext(Dispatchers.IO) {
                 val userMap = mapOf(
                     "password" to newPassword
                 )
 
-                db.collection("users")
-                    .document(userId)
-                    .update(userMap)
-                    .await()
+                db.collection("users").document(userId).update(userMap).await()
 
                 true
+            }
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    suspend fun isUserDeleted(userId: String): Boolean {
+        return try {
+            withContext(Dispatchers.IO) {
+                val querySnapshot = db.collection("users").whereEqualTo("id", userId).get().await()
+
+                querySnapshot.isEmpty
             }
         } catch (e: Exception) {
             false

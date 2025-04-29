@@ -39,18 +39,17 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.cs501.pantrypal.ui.theme.InfoColor
 import com.cs501.pantrypal.ui.theme.Typography
+import com.cs501.pantrypal.util.PasswordCheck
 import com.cs501.pantrypal.viewmodel.UserViewModel
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegisterScreen(
-    userViewModel: UserViewModel,
-    navController: NavController,
-    snackbarHostState: SnackbarHostState
+    userViewModel: UserViewModel, navController: NavController, snackbarHostState: SnackbarHostState
 ) {
-    LaunchedEffect(userViewModel.isLoggedIn) {
-        if (userViewModel.isLoggedIn) {
+    LaunchedEffect(userViewModel.isUserLoggedIn()) {
+        if (userViewModel.isUserLoggedIn()) {
             navController.navigate("discover") {
                 popUpTo("register") { inclusive = true }
             }
@@ -94,8 +93,8 @@ fun RegisterScreen(
                 return false
             }
 
-            password.length < 6 -> {
-                onError("Password must be at least 6 characters long")
+            !PasswordCheck().validatePassword(password) -> {
+                onError("Password must be at least 8 characters long")
                 return false
             }
 
@@ -122,8 +121,7 @@ fun RegisterScreen(
         navController.navigate("discover") {
             coroutineScope.launch {
                 snackbarHostState.showSnackbar(
-                    message = "Register Successful",
-                    duration = SnackbarDuration.Long
+                    message = "Register Successful", duration = SnackbarDuration.Long
                 )
             }
             popUpTo("register") { inclusive = true }

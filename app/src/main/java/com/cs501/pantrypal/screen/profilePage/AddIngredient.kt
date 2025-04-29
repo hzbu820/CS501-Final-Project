@@ -23,7 +23,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.QrCodeScanner
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -80,6 +79,7 @@ data class IngredientFormState(
     val category: String = "",
     val expirationDate: String = "",
     val notes: String = "",
+    val image: String = "",
     val isEditing: Boolean = false
 )
 
@@ -130,6 +130,7 @@ fun AddIngredientDialog(
                     category = ingredient.foodCategory,
                     expirationDate = ingredient.expirationDate,
                     notes = ingredient.notes,
+                    image = ingredient.image,
                     isEditing = true
                 )
             } else {
@@ -195,22 +196,17 @@ fun AddIngredientDialog(
         if (!nameError && !quantityError) {
             if (formState.isEditing) {
                 updateIngredient(
-                    formState,
-                    userIngredientsViewModel,
-                    coroutineScope,
-                    snackbarHostState
+                    formState, userIngredientsViewModel, coroutineScope, snackbarHostState
                 )
             } else {
                 addNewIngredient(
-                    formState,
-                    userIngredientsViewModel,
-                    coroutineScope,
-                    snackbarHostState
+                    formState, userIngredientsViewModel, coroutineScope, snackbarHostState
                 )
             }
             onDismiss()
         }
     }
+
     var showDatePicker by remember { mutableStateOf(false) }
 
     AlertDialog(
@@ -232,8 +228,8 @@ fun AddIngredientDialog(
                     showSuggestions = showSuggestions,
                     filteredIngredients = filteredIngredients,
                     onSelectIngredient = ::selectIngredient,
-                    userIngredientsViewModel = userIngredientsViewModel
-                )
+                    userIngredientsViewModel = userIngredientsViewModel,
+                    onImageChange = { formState = formState.copy(image = it) })
 
                 // Category selector
                 CategorySelector(
@@ -326,13 +322,10 @@ fun AddIngredientDialog(
 
 @Composable
 fun DatePick(
-    onClick: () -> Unit,
-    formState: IngredientFormState,
-    onValueChange: (String) -> Unit
+    onClick: () -> Unit, formState: IngredientFormState, onValueChange: (String) -> Unit
 ) {
     Box(
-        modifier = Modifier
-            .fillMaxWidth()
+        modifier = Modifier.fillMaxWidth()
     ) {
         OutlinedTextField(
             value = formState.expirationDate,
@@ -340,8 +333,7 @@ fun DatePick(
             label = { Text("Expiration Date (Optional)") },
             modifier = Modifier.fillMaxWidth(),
             keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Text,
-                imeAction = ImeAction.Next
+                keyboardType = KeyboardType.Text, imeAction = ImeAction.Next
             ),
             singleLine = true,
             readOnly = true,
@@ -351,8 +343,7 @@ fun DatePick(
                     contentDescription = "Choose Date",
                     tint = InfoColor
                 )
-            }
-        )
+            })
         Box(
             modifier = Modifier
                 .matchParentSize()
@@ -365,6 +356,7 @@ fun DatePick(
 fun IngredientNameInput(
     name: String,
     onNameChange: (String) -> Unit,
+    onImageChange: (String) -> Unit,
     nameError: Boolean,
     showSuggestions: Boolean,
     snackbarHostState: SnackbarHostState,
@@ -377,12 +369,12 @@ fun IngredientNameInput(
     var hasCameraPermission by remember {
         mutableStateOf(
             ContextCompat.checkSelfPermission(
-                context,
-                Manifest.permission.CAMERA
+                context, Manifest.permission.CAMERA
             ) == PackageManager.PERMISSION_GRANTED
         )
     }
     val coroutineScope = rememberCoroutineScope()
+    val errorMessage = remember { mutableStateOf("") }
 
     // Get camera permission
     val cameraPermissionLauncher = rememberLauncherForActivityResult(
@@ -402,9 +394,11 @@ fun IngredientNameInput(
                 // Process the image
                 try {
                     val image = InputImage.fromFilePath(context, imageUri!!)
-                    scanBarcode(image, userIngredientsViewModel, onNameChange) { error ->
+                    scanBarcode(
+                        image, userIngredientsViewModel, onNameChange, onImageChange
+                    ) { error ->
                         coroutineScope.launch {
-                            snackbarHostState.showSnackbar("Error: $error")
+                            errorMessage.value = error
                         }
                     }
                 } catch (e: Exception) {
@@ -416,9 +410,19 @@ fun IngredientNameInput(
         })
 
     Box(modifier = Modifier.fillMaxWidth()) {
+        if (errorMessage.value != "") {
+            Text(
+                text = errorMessage.value,
+                color = androidx.compose.ui.graphics.Color.Red,
+                modifier = Modifier.padding(8.dp)
+            )
+        }
         OutlinedTextField(
             value = name,
-            onValueChange = onNameChange,
+            onValueChange = {
+                onNameChange(it)
+                errorMessage.value = ""
+            },
             label = { Text("Ingredient Name") },
             modifier = Modifier.fillMaxWidth(),
             isError = nameError,
@@ -492,30 +496,52 @@ private fun scanBarcode(
     image: InputImage,
     userIngredientsViewModel: UserIngredientsViewModel,
     onNameChange: (String) -> Unit,
-    onError: (String) -> Unit
+    onError: (String) -> Unit,
+    onImageChange: (String) -> Unit
 ) {
     // set barcode scanner options
     val options = BarcodeScannerOptions.Builder().setBarcodeFormats(
-            Barcode.FORMAT_EAN_13,
-            Barcode.FORMAT_EAN_8,
-            Barcode.FORMAT_UPC_A,
-            Barcode.FORMAT_UPC_E,
-            Barcode.FORMAT_CODE_128
-        ).build()
+        Barcode.FORMAT_EAN_13,
+        Barcode.FORMAT_EAN_8,
+        Barcode.FORMAT_UPC_A,
+        Barcode.FORMAT_UPC_E,
+        Barcode.FORMAT_CODE_128
+    ).build()
 
     val scanner = BarcodeScanning.getClient(options)
 
     scanner.process(image).addOnSuccessListener { barcodes ->
-            if (barcodes.isNotEmpty()) {
-                val barcode = barcodes[0]
-                barcode.rawValue?.let { value ->
-                    userIngredientsViewModel.searchIngredientsByApi(value)
-                    onNameChange(value)
+        if (barcodes.isNotEmpty()) {
+            val barcode = barcodes[0]
+            barcode.rawValue?.let { value ->
+                onNameChange("Loading product info...")
+
+                kotlinx.coroutines.MainScope().launch {
+                    try {
+                        userIngredientsViewModel.searchIngredientsByApi(value)
+
+                        kotlinx.coroutines.delay(500)
+
+                        val result = userIngredientsViewModel.ingredientsByBarcode.value
+                        if (result != null && result.name.isNotEmpty()) {
+                            onNameChange(result.name)
+                            onImageChange(result.image)
+                        } else {
+                            onNameChange("Product: $value")
+                            onError("Product found but no details available")
+                        }
+                    } catch (e: Exception) {
+                        onNameChange("Scanned: $value")
+                        onError("Error loading product: ${e.message}")
+                    }
                 }
             }
-        }.addOnFailureListener { e ->
-            onError("Failed to scan barcode: ${e.message}")
+        } else {
+            onError("No barcode found")
         }
+    }.addOnFailureListener { e ->
+        onError("Failed to scan barcode: ${e.message}")
+    }
 }
 
 @Composable
@@ -545,8 +571,7 @@ fun CategorySelector(
             Box(
                 modifier = Modifier
                     .matchParentSize()
-                    .clickable { onShowCategoryMenu(true) }
-            )
+                    .clickable { onShowCategoryMenu(true) })
 
             DropdownMenu(
                 expanded = showCategoryMenu, onDismissRequest = { onShowCategoryMenu(false) }) {
@@ -608,8 +633,7 @@ fun QuantityUnitInput(
             Box(
                 modifier = Modifier
                     .matchParentSize()
-                    .clickable { onShowUnitMenu(true) }
-            )
+                    .clickable { onShowUnitMenu(true) })
 
             DropdownMenu(
                 expanded = showUnitMenu, onDismissRequest = { onShowUnitMenu(false) }) {
