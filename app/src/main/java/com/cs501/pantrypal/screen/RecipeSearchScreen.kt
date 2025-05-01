@@ -26,7 +26,6 @@ import com.cs501.pantrypal.ui.theme.PrimaryLight
 import com.cs501.pantrypal.ui.theme.Typography
 import com.cs501.pantrypal.util.ShakeSensorManager
 import com.cs501.pantrypal.viewmodel.RecipeViewModel
-import com.cs501.pantrypal.viewmodel.toSavedRecipe
 import kotlinx.coroutines.launch
 
 @Composable
