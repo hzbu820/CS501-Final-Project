@@ -26,6 +26,7 @@ import com.cs501.pantrypal.ui.theme.PrimaryLight
 import com.cs501.pantrypal.ui.theme.Typography
 import com.cs501.pantrypal.util.ShakeSensorManager
 import com.cs501.pantrypal.viewmodel.RecipeViewModel
+import com.cs501.pantrypal.viewmodel.toSavedRecipe
 import kotlinx.coroutines.launch
 
 @Composable
@@ -217,7 +218,7 @@ fun TabletRecipeSearchLayout(
                     modifier = Modifier.fillMaxSize()
                 ) {
                     items(viewModel.recipes) { recipe ->
-                        val isSaved = viewModel.isRecipeSaved(recipe)
+                        //val isSaved = viewModel.isRecipeSaved(recipe)
                         Card(
                             modifier = Modifier
                                 .padding(8.dp)
@@ -239,15 +240,33 @@ fun TabletRecipeSearchLayout(
                                     modifier = Modifier.fillMaxWidth()
                                 )
                                 Row(modifier = Modifier.padding(8.dp)) {
-                                    TextButton(onClick = {
-                                        if (isSaved) {
-                                            viewModel.deleteRecipeByUrl(recipe.uri ?: "")
-                                        } else {
-                                            viewModel.saveRecipeToCookbook(recipe)
+
+                                    TextButton(
+                                        onClick = {
+                                            coroutineScope.launch {
+                                                val exists = viewModel.isRecipeInCookbook(recipe.uri, "Default")
+                                                if (exists) {
+                                                    snackbarHostState.showSnackbar("Already added to Default!")
+                                                    //isSavedInDefault = false
+                                                } else {
+                                                    // 如果没保存过，才保存
+                                                    viewModel.saveRecipeToCookbook(recipe, "Default")
+                                                    snackbarHostState.showSnackbar("Saved to Default!")
+                                                }
+                                            }
                                         }
-                                    }) {
-                                        Text(if (isSaved) "Remove" else "Save", style = MaterialTheme.typography.labelMedium)
+                                    ) {
+                                        Text( "Save", style = MaterialTheme.typography.labelMedium)
                                     }
+//                                    TextButton(onClick = {
+//                                        if (isSaved) {
+//                                            viewModel.deleteRecipeByUrl(recipe.uri ?: "")
+//                                        } else {
+//                                            viewModel.saveRecipeToCookbook(recipe)
+//                                        }
+//                                    }) {
+//                                        Text( "Save", style = MaterialTheme.typography.labelMedium)
+//                                    }
                                 }
                             }
                         }
@@ -348,9 +367,12 @@ fun PhoneRecipeSearchLayout(
                 CircularProgressIndicator()
             }
         } else {
+
             LazyColumn {
                 items(viewModel.recipes) { recipe ->
-                    val isSaved = viewModel.isRecipeSaved(recipe)
+                    val coroutineScope = rememberCoroutineScope()
+
+
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -358,27 +380,39 @@ fun PhoneRecipeSearchLayout(
                             .clickable {
                                 viewModel.selectedRecipe = recipe
                                 navController.navigate("detail")
-                                //navController.navigate("detail/${Uri.encode(recipe.uri)}")
                             }
                     ) {
                         Column {
                             Text(recipe.label, style = MaterialTheme.typography.titleMedium)
                             AsyncImage(model = recipe.image, contentDescription = null)
-                            Row {
-                                TextButton(onClick = {
-                                    if (isSaved) {
-                                        viewModel.deleteRecipeByUrl(recipe.uri ?: "")
-                                    } else {
-                                        viewModel.saveRecipeToCookbook(recipe)
+
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.padding(8.dp)
+                            ) {
+                                TextButton(
+                                    onClick = {
+                                        coroutineScope.launch {
+                                            val exists = viewModel.isRecipeInCookbook(recipe.uri, "Default")
+                                            if (exists) {
+                                                snackbarHostState.showSnackbar("Already added to Default!")
+                                                //isSavedInDefault = false
+                                            } else {
+                                                // 如果没保存过，才保存
+                                                viewModel.saveRecipeToCookbook(recipe, "Default")
+                                                snackbarHostState.showSnackbar("Saved to Default!")
+                                            }
+                                        }
                                     }
-                                }) {
-                                    Text(if (isSaved) "Remove" else "Save", style = MaterialTheme.typography.labelMedium)
+                                ) {
+                                    Text( "Save", style = MaterialTheme.typography.labelMedium)
                                 }
                             }
                         }
                     }
                 }
             }
+
         }
     }
 }
