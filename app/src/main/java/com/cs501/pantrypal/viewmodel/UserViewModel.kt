@@ -50,7 +50,7 @@ class UserViewModel(application: Application) : BaseViewModel(application) {
      */
     suspend fun login(emailAddress: String, password: String): Map<String, Any> {
         val user = repository.getUserByEmail(emailAddress)
-        val firebaseUser = FirebaseService().getUserByEmail(emailAddress)
+        val firebaseUser = FirebaseService.getInstance().getUserByEmail(emailAddress)
         val passwordCheck = PasswordCheck()
 
         if (firebaseUser == null) {
@@ -96,7 +96,7 @@ class UserViewModel(application: Application) : BaseViewModel(application) {
      */
     suspend fun register(username: String, password: String, email: String = ""): Boolean {
         // Check if email already exists
-        val firebaseUser = FirebaseService()
+        val firebaseUser = FirebaseService.getInstance()
         val existingUserRemote = firebaseUser.isEmailNotRegistered(email)
         val existingUser = repository.getUserByEmail(email)
 

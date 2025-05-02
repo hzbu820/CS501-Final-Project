@@ -1,5 +1,7 @@
 package com.cs501.pantrypal.util
 
+import com.cs501.pantrypal.R
+
 /**
  * Constants used throughout the application
  * Contains shared values like measurement units and food categories
@@ -26,6 +28,22 @@ object Constants {
         "Other"
     )
 
+    /**
+     * Common ingredient image based on the food category
+     */
+    val FOOD_IMAGES = mapOf(
+        "Fruits" to R.drawable.fruits,
+        "Vegetables" to R.drawable.vegetable,
+        "Meat" to  R.drawable.meat,
+        "Dairy" to  R.drawable.dairy,
+        "Grains" to   R.drawable.bread,
+        "Seafood" to  R.drawable.seafood,
+        "Spices" to  R.drawable.spices,
+        "Beverages" to  R.drawable.beverages,
+        "Snacks" to  R.drawable.snack,
+        "Other" to R.drawable.grocery,
+        "List" to R.drawable.list
+    )
 
     /**
      * Common Cookbook categories for organizing recipes

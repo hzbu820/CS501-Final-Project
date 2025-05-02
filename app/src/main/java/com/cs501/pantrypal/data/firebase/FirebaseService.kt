@@ -8,8 +8,21 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 
-class FirebaseService {
-    private val db = FirebaseFirestore.getInstance()
+class FirebaseService private constructor() {
+    private val db: FirebaseFirestore by lazy {
+        FirebaseFirestore.getInstance()
+    }
+
+    companion object {
+        @Volatile
+        private var instance: FirebaseService? = null
+
+        fun getInstance(): FirebaseService {
+            return instance ?: synchronized(this) {
+                instance ?: FirebaseService().also { instance = it }
+            }
+        }
+    }
 
     suspend fun syncUserData(user: User): Boolean {
         return try {

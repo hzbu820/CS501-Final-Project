@@ -28,7 +28,7 @@ abstract class BaseViewModel(application: Application) : AndroidViewModel(applic
                 preferences[stringPreferencesKey("user_id")] ?: ""
             }.collect { userId ->
                 if (userId != "") {
-                    val firebaseService = FirebaseService()
+                    val firebaseService = FirebaseService.getInstance()
                     val deleted = firebaseService.isUserDeleted(userId)
                     if (deleted) {
                         // If the user is deleted, clear the user ID

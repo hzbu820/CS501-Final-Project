@@ -88,7 +88,7 @@ fun AppNavHost() {
             composable("cookbook") {
                 CookBookScreen(navController, recipeViewModel)
             }
-            composable("grocerylist") {
+            composable("groceryList") {
                 GroceryListScreen(groceryViewModel, snackbarHostState)
             }
             composable("profile") {
