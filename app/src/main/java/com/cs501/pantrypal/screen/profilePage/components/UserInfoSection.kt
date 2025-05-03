@@ -1,10 +1,15 @@
 package com.cs501.pantrypal.screen.profilePage.components
 
-import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Sync
@@ -31,11 +36,7 @@ import java.util.Locale
 
 @Composable
 fun UserInfoSection(
-    user: User,
-    profileImageUri: Uri?,
-    onEditClick: () -> Unit,
-    onImageClick: () -> Unit,
-    onSyncClick: () -> Unit = {}
+    user: User, onEditClick: () -> Unit, onImageClick: () -> Unit, onSyncClick: () -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -49,18 +50,9 @@ fun UserInfoSection(
                 .size(100.dp)
                 .clip(CircleShape)
                 .background(BackgroundLight)
-                .clickable(onClick = onImageClick),
-            contentAlignment = Alignment.Center
+                .clickable(onClick = onImageClick), contentAlignment = Alignment.Center
         ) {
             when {
-                profileImageUri != null -> {
-                    AsyncImage(
-                        model = profileImageUri,
-                        contentDescription = "Profile Image",
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
-                    )
-                }
                 user.profileImageUrl.isNotBlank() -> {
                     val imageFile = File(user.profileImageUrl)
                     if (imageFile.exists()) {
@@ -78,6 +70,7 @@ fun UserInfoSection(
                         )
                     }
                 }
+
                 else -> {
                     Image(
                         painter = painterResource(id = R.drawable.default_profile_image),
@@ -95,8 +88,7 @@ fun UserInfoSection(
                 .weight(1f)
         ) {
             Text(
-                text = user.username,
-                style = Typography.headlineLarge
+                text = user.username, style = Typography.headlineLarge
             )
 
             Text(
@@ -105,7 +97,11 @@ fun UserInfoSection(
             )
 
             Text(
-                text = "Join PantryPal Since: ${SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(Date(user.createdAt))}",
+                text = "Join PantryPal Since: ${
+                    SimpleDateFormat(
+                        "MMM dd, yyyy", Locale.getDefault()
+                    ).format(Date(user.createdAt))
+                }",
                 style = Typography.bodySmall,
             )
         }

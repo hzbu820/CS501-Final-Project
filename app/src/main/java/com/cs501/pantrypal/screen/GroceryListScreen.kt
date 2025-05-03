@@ -26,21 +26,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.AddShoppingCart
 import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.Cookie
-import androidx.compose.material.icons.filled.Eco
-import androidx.compose.material.icons.filled.Grain
-import androidx.compose.material.icons.filled.LocalDrink
-import androidx.compose.material.icons.filled.Opacity
-import androidx.compose.material.icons.filled.Restaurant
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Water
-import androidx.compose.material.icons.filled.Whatshot
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.ShoppingCart
 import androidx.compose.material3.AlertDialog
@@ -78,13 +68,14 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
+import com.cs501.pantrypal.R
 import com.cs501.pantrypal.data.database.GroceryItem
 import com.cs501.pantrypal.ui.theme.ErrorColor
 import com.cs501.pantrypal.ui.theme.InfoColor
@@ -92,14 +83,14 @@ import com.cs501.pantrypal.ui.theme.TextSecondary
 import com.cs501.pantrypal.ui.theme.TextTertiary
 import com.cs501.pantrypal.ui.theme.Typography
 import com.cs501.pantrypal.util.Constants
+import com.cs501.pantrypal.util.Constants.FOOD_IMAGES
 import com.cs501.pantrypal.viewmodel.GroceryViewModel
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GroceryListScreen(
-    groceryViewModel: GroceryViewModel,
-    snackbarHostState: SnackbarHostState
+    groceryViewModel: GroceryViewModel, snackbarHostState: SnackbarHostState
 ) {
     val allGroceryItems by groceryViewModel.allGroceryItems.collectAsState()
     val showCheckedItems by groceryViewModel.showCheckedItems.collectAsState()
@@ -296,7 +287,7 @@ fun TabletGroceryLayout(
 
                 // All categories option
                 CategoryItem(
-                    category = "All Items",
+                    category = "List",
                     isSelected = categoryFilter == null,
                     onCategorySelect = { onCategorySelect(null) })
 
@@ -391,22 +382,14 @@ fun CategoryItem(
             .clickable { onCategorySelect() }
             .padding(12.dp),
         verticalAlignment = Alignment.CenterVertically) {
+
         Icon(
-            imageVector = when (category) {
-                "All Items" -> Icons.AutoMirrored.Filled.List
-                "Vegetables" -> Icons.Default.Eco
-                "Meat" -> Icons.Default.Restaurant
-                "Dairy" -> Icons.Default.Opacity
-                "Grains" -> Icons.Default.Grain
-                "Seafood" -> Icons.Default.Water
-                "Spices" -> Icons.Default.Whatshot
-                "Beverages" -> Icons.Default.LocalDrink
-                "Snacks" -> Icons.Default.Cookie
-                else -> Icons.Default.Category
-            },
+            painter = painterResource(id = FOOD_IMAGES[category] ?: R.drawable.grocery),
             contentDescription = category,
-            tint = textColor,
-            modifier = Modifier.padding(end = 12.dp)
+            modifier = Modifier
+                .size(35.dp)
+                .padding(end = 12.dp),
+            tint = Color.Unspecified
         )
 
         Text(
@@ -797,8 +780,7 @@ fun AddGroceryItemDialog(
                     .padding(vertical = 8.dp),
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(
-                    imeAction = ImeAction.Next,
-                    keyboardType = KeyboardType.Number
+                    imeAction = ImeAction.Next, keyboardType = KeyboardType.Number
                 )
             )
 
@@ -884,8 +866,7 @@ fun AddGroceryItemDialog(
         }
     }, dismissButton = {
         TextButton(
-            onClick = onDismiss,
-            colors = ButtonDefaults.textButtonColors(contentColor = InfoColor)
+            onClick = onDismiss, colors = ButtonDefaults.textButtonColors(contentColor = InfoColor)
         ) {
             Text("Cancel")
         }

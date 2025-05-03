@@ -18,7 +18,6 @@ import com.cs501.pantrypal.ui.theme.Typography
 
 @Composable
 fun ProfileTopBar(
-    isLoggedIn: Boolean,
     onLogout: () -> Unit
 ) {
     Row(
@@ -33,14 +32,13 @@ fun ProfileTopBar(
             style = Typography.displayLarge,
         )
 
-        if (isLoggedIn) {
-            IconButton(onClick = onLogout) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ExitToApp,
-                    contentDescription = "Logout",
-                    tint = ErrorColor
-                )
-            }
+        IconButton(onClick = onLogout) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ExitToApp,
+                contentDescription = "Logout",
+                tint = ErrorColor
+            )
         }
+
     }
 }
