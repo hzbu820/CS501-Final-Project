@@ -295,6 +295,7 @@ class RecipeViewModel(application: Application) : BaseViewModel(application) {
 
             val savedRecipe = recipe.toSavedRecipe(getCurrentUserId(), isFavorite, cookbookName)
             repository.insertRecipe(savedRecipe)
+            repository.deletePlaceholderRecipesFromCookbook(cookbookName)
             loadRecipesByCookbook(cookbookName)
             //loadSavedRecipes()
         }

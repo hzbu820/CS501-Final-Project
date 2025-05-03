@@ -227,48 +227,103 @@ fun TabletRecipeSearchLayout(
                                     navController.navigate("detail")
                                 }
                         ) {
-                            Column {
-                                Text(
-                                    recipe.label, 
-                                    style = MaterialTheme.typography.titleMedium,
-                                    modifier = Modifier.padding(8.dp)
-                                )
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
                                 AsyncImage(
-                                    model = recipe.image, 
+                                    model = recipe.image,
                                     contentDescription = null,
-                                    modifier = Modifier.fillMaxWidth()
+                                    modifier = Modifier
+                                        .size(100.dp)
+                                        .padding(end = 8.dp)
                                 )
-                                Row(modifier = Modifier.padding(8.dp)) {
 
-                                    TextButton(
+                                Column(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .fillMaxHeight(),
+                                    verticalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Text(
+                                        text = recipe.label,
+                                        style = MaterialTheme.typography.headlineMedium,
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(bottom = 8.dp)
+                                    )
+
+                                    Button(
                                         onClick = {
                                             coroutineScope.launch {
                                                 val exists = viewModel.isRecipeInCookbook(recipe.uri, "Default")
                                                 if (exists) {
                                                     snackbarHostState.showSnackbar("Already added to Default!")
-                                                    //isSavedInDefault = false
                                                 } else {
-                                                    // 如果没保存过，才保存
                                                     viewModel.saveRecipeToCookbook(recipe, "Default")
                                                     snackbarHostState.showSnackbar("Saved to Default!")
                                                 }
                                             }
-                                        }
+                                        },
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(30.dp) ,// 控制竖向高度更窄
+                                        colors = ButtonDefaults.buttonColors(
+                                            containerColor = MaterialTheme.colorScheme.primaryContainer, // 更浅的主题色
+                                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer   // 匹配的文字色
+                                        )
+
                                     ) {
-                                        Text( "Save", style = MaterialTheme.typography.labelMedium)
+                                        Text("Save", style = MaterialTheme.typography.labelLarge)
                                     }
-//                                    TextButton(onClick = {
-//                                        if (isSaved) {
-//                                            viewModel.deleteRecipeByUrl(recipe.uri ?: "")
-//                                        } else {
-//                                            viewModel.saveRecipeToCookbook(recipe)
-//                                        }
-//                                    }) {
-//                                        Text( "Save", style = MaterialTheme.typography.labelMedium)
-//                                    }
                                 }
                             }
                         }
+//                        Card(
+//                            modifier = Modifier
+//                                .padding(8.dp)
+//                                .fillMaxWidth()
+//                                .clickable {
+//                                    viewModel.selectedRecipe = recipe
+//                                    navController.navigate("detail")
+//                                }
+//                        ) {
+//                            Column {
+//                                Text(
+//                                    recipe.label,
+//                                    style = MaterialTheme.typography.titleMedium,
+//                                    modifier = Modifier.padding(8.dp)
+//                                )
+//                                AsyncImage(
+//                                    model = recipe.image,
+//                                    contentDescription = null,
+//                                    modifier = Modifier.fillMaxWidth()
+//                                )
+//                                Row(modifier = Modifier.padding(8.dp)) {
+//
+//                                    TextButton(
+//                                        onClick = {
+//                                            coroutineScope.launch {
+//                                                val exists = viewModel.isRecipeInCookbook(recipe.uri, "Default")
+//                                                if (exists) {
+//                                                    snackbarHostState.showSnackbar("Already added to Default!")
+//                                                    //isSavedInDefault = false
+//                                                } else {
+//                                                    // 如果没保存过，才保存
+//                                                    viewModel.saveRecipeToCookbook(recipe, "Default")
+//                                                    snackbarHostState.showSnackbar("Saved to Default!")
+//                                                }
+//                                            }
+//                                        }
+//                                    ) {
+//                                        Text( "Save", style = MaterialTheme.typography.labelMedium)
+//                                    }
+//
+//                                }
+//                            }
+//                        }
                     }
                 }
             }
@@ -381,33 +436,85 @@ fun PhoneRecipeSearchLayout(
                                 navController.navigate("detail")
                             }
                     ) {
-                        Column {
-                            Text(recipe.label, style = MaterialTheme.typography.titleMedium)
-                            AsyncImage(model = recipe.image, contentDescription = null)
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            AsyncImage(
+                                model = recipe.image,
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .size(100.dp)
+                                    .padding(end = 8.dp)
+                            )
 
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.padding(8.dp)
+                            Column(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .fillMaxHeight(),
+                                verticalArrangement = Arrangement.SpaceBetween
                             ) {
-                                TextButton(
+                                Text(
+                                    text = recipe.label,
+                                    style = MaterialTheme.typography.titleLarge,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(bottom = 8.dp)
+                                )
+
+                                Button(
                                     onClick = {
                                         coroutineScope.launch {
                                             val exists = viewModel.isRecipeInCookbook(recipe.uri, "Default")
                                             if (exists) {
                                                 snackbarHostState.showSnackbar("Already added to Default!")
-                                                //isSavedInDefault = false
                                             } else {
-                                                // 如果没保存过，才保存
                                                 viewModel.saveRecipeToCookbook(recipe, "Default")
                                                 snackbarHostState.showSnackbar("Saved to Default!")
                                             }
                                         }
-                                    }
+                                    },
+                                    modifier = Modifier
+                                        .fillMaxWidth(),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = MaterialTheme.colorScheme.primaryContainer, // 更浅的主题色
+                                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer   // 匹配的文字色
+                                    )
+
                                 ) {
-                                    Text( "Save", style = MaterialTheme.typography.labelMedium)
+                                    Text("Save", style = MaterialTheme.typography.labelLarge)
                                 }
                             }
                         }
+//                        Column {
+//                            Text(recipe.label, style = MaterialTheme.typography.titleMedium)
+//                            AsyncImage(model = recipe.image, contentDescription = null)
+//
+//                            Row(
+//                                verticalAlignment = Alignment.CenterVertically,
+//                                modifier = Modifier.padding(8.dp)
+//                            ) {
+//                                TextButton(
+//                                    onClick = {
+//                                        coroutineScope.launch {
+//                                            val exists = viewModel.isRecipeInCookbook(recipe.uri, "Default")
+//                                            if (exists) {
+//                                                snackbarHostState.showSnackbar("Already added to Default!")
+//                                                //isSavedInDefault = false
+//                                            } else {
+//                                                // 如果没保存过，才保存
+//                                                viewModel.saveRecipeToCookbook(recipe, "Default")
+//                                                snackbarHostState.showSnackbar("Saved to Default!")
+//                                            }
+//                                        }
+//                                    }
+//                                ) {
+//                                    Text( "Save", style = MaterialTheme.typography.labelMedium)
+//                                }
+//                            }
+//                        }
                     }
                 }
             }

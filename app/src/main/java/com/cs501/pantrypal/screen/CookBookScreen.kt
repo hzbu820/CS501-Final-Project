@@ -21,6 +21,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Search
@@ -285,6 +286,8 @@ fun TabletCookBookLayout(
 ) {
     var isCustomCookbooksExpanded by remember { mutableStateOf(true) }
     val defaultCategories = COOKBOOK_CATEGORIES
+    val customCookbooks = cookbooks.filterNot { defaultCategories.contains(it) }
+
     Row(modifier = Modifier.fillMaxSize()) {
         // Left sidebar with cookbooks and search
         Card(
@@ -345,7 +348,7 @@ fun TabletCookBookLayout(
                 // Cookbooks header
                 Row(verticalAlignment= Alignment.CenterVertically) {
                     Text(
-                    text = "Cookcooks with Recipes",
+                    text = "Customized Cookcooks",
                     style = Typography.headlineMedium,
                     modifier = Modifier.padding(vertical = 8.dp)
                     )
@@ -370,9 +373,9 @@ fun TabletCookBookLayout(
                 // Custom Cookbooks list (expandable)
                 if (isCustomCookbooksExpanded) {
                     val filteredCookbooks = if (searchQuery.isEmpty()) {
-                        cookbooks
+                        customCookbooks
                     } else {
-                        cookbooks.filter { it.contains(searchQuery, ignoreCase = true) }
+                        customCookbooks.filter { it.contains(searchQuery, ignoreCase = true) }
                     }
 
                     LazyColumn(
@@ -442,19 +445,29 @@ fun TabletCookBookLayout(
         ) {
             // Cookbook title if selected
             if (selectedCookbook != null) {
-                Text(
-                    text = selectedCookbook,
-                    style = Typography.displayMedium,
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.padding(start = 16.dp, top = 16.dp, bottom = 16.dp)
-                )
+                ) {
+                    IconButton(onClick = { onCookbookSelect(null) }) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = "Back"
+                        )
+                    }
+                    Text(
+                        text = selectedCookbook,
+                        style = Typography.displayMedium,
+                        modifier = Modifier.padding(start = 8.dp)
+                    )
+                }
 
-                // Display recipes for the selected cookbook
                 RecipeListForCookbook(
                     cookbookName = selectedCookbook,
                     navController = navController,
                     viewModel = viewModel
                 )
-            } else {
+            }else {
                 // Show all cookbooks in card format
                 Text(
                     text = "All Cookbooks",
@@ -485,6 +498,8 @@ fun TabletCookBookLayout(
                         }
                     }
                 }
+
+
             }
         }
     }

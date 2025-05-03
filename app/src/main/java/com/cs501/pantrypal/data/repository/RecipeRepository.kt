@@ -5,6 +5,8 @@ import com.cs501.pantrypal.data.database.SavedRecipeDao
 import com.cs501.pantrypal.data.model.Recipe
 import com.cs501.pantrypal.data.network.ApiClient
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
+
 
 class RecipeRepository(private val savedRecipeDao: SavedRecipeDao) {
     val allRecipes: Flow<List<SavedRecipe>> = savedRecipeDao.getAllRecipes()
@@ -40,6 +42,16 @@ class RecipeRepository(private val savedRecipeDao: SavedRecipeDao) {
     suspend fun deleteRecipesByCookbook(cookbook: String) {
         savedRecipeDao.deleteByCookbook(cookbook)
     }
+
+    // RecipeRepository.kt
+    suspend fun deletePlaceholderRecipesFromCookbook(cookbookName: String) {
+        val placeholderRecipes = savedRecipeDao.getRecipesByCookbook(cookbookName)
+            .first()
+            .filter { it.label == "placeholder recipe" && it.url.isEmpty() }
+
+        placeholderRecipes.forEach { savedRecipeDao.deleteRecipe(it) }
+    }
+
 
 
     /**
