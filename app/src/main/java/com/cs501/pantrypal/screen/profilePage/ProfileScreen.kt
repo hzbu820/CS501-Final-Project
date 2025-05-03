@@ -71,10 +71,10 @@ fun ProfileScreen(
 
     if (showAddIngredientDialog) {
         IngredientEditDialog(
-            userIngredientsViewModel = userIngredientsViewModel,
-            onDismiss = { showAddIngredientDialog = false },
-            snackbarHostState = snackbarHostState,
-            ingredient = clickedIngredient.value
+            userIngredientsViewModel = userIngredientsViewModel, onDismiss = {
+                showAddIngredientDialog = false
+                clickedIngredient.value = null
+            }, snackbarHostState = snackbarHostState, ingredient = clickedIngredient.value
         )
     }
 

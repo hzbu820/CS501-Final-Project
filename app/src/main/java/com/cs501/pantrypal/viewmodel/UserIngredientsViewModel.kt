@@ -103,6 +103,7 @@ class UserIngredientsViewModel(application: Application) : BaseViewModel(applica
         viewModelScope.launch {
             repository.deleteAllIngredientsByUserId(getCurrentUserId())
             repository.updateAllIngredients(ingredients)
+            getAllIngredients()
         }
     }
 }

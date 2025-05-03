@@ -25,6 +25,7 @@ import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.QrCodeScanner
+import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -35,6 +36,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -65,7 +67,6 @@ import com.cs501.pantrypal.ui.theme.InfoColor
 import com.cs501.pantrypal.util.Constants
 import com.cs501.pantrypal.viewmodel.UserIngredientsViewModel
 import com.google.mlkit.vision.common.InputImage
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.ZoneId
@@ -75,7 +76,7 @@ import java.time.ZoneId
 data class IngredientFormState(
     val id: Int = 0,
     val name: String = "",
-    val category: String = "",
+    val category: String = "Default",
     val image: String = "",
     val quantity: String = "",
     val unit: String = "g",
@@ -188,96 +189,121 @@ fun IngredientEditDialog(
 
         if (!nameError && !quantityError) {
             if (formState.isEditing) {
-                updateIngredient(
-                    formState, userIngredientsViewModel, coroutineScope, snackbarHostState
-                )
+                val ingredient = ingredientFormatter(formState, userIngredientsViewModel)
+
+                userIngredientsViewModel.updateIngredient(ingredient)
+                coroutineScope.launch {
+                    snackbarHostState.showSnackbar("Ingredient updated successfully")
+                }
+
             } else {
-                addNewIngredient(
-                    formState, userIngredientsViewModel, coroutineScope, snackbarHostState
-                )
+                val ingredient = ingredientFormatter(formState, userIngredientsViewModel)
+
+                userIngredientsViewModel.addIngredient(ingredient)
+
+                coroutineScope.launch {
+                    snackbarHostState.showSnackbar("Ingredient added successfully")
+                }
             }
             onDismiss()
         }
     }
 
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(if (formState.isEditing) "Edit Ingredient" else "Add Ingredient") },
-        text = {
-            if (isTablet) {
-                TabletLayout(
-                    formState = formState,
-                    onFormStateChange = { formState = it },
-                    nameError = nameError,
-                    quantityError = quantityError,
-                    showDatePicker = showDatePicker,
-                    onShowDatePicker = { showDatePicker = it },
-                    showUnitMenu = showUnitMenu,
-                    onShowUnitMenu = { showUnitMenu = it },
-                    showCategoryMenu = showCategoryMenu,
-                    onShowCategoryMenu = { showCategoryMenu = it },
-                    onIsAddingNewCategory = { isAddingNewCategory = it },
-                    unitOptions = unitOptions,
-                    predefinedCategories = predefinedCategories,
-                    userIngredientsViewModel = userIngredientsViewModel,
-                    snackbarHostState = snackbarHostState
-                )
-            } else {
-                PhoneLayout(
-                    formState = formState,
-                    onFormStateChange = { formState = it },
-                    nameError = nameError,
-                    quantityError = quantityError,
-                    showDatePicker = showDatePicker,
-                    onShowDatePicker = { showDatePicker = it },
-                    showUnitMenu = showUnitMenu,
-                    onShowUnitMenu = { showUnitMenu = it },
-                    showCategoryMenu = showCategoryMenu,
-                    onShowCategoryMenu = { showCategoryMenu = it },
-                    onIsAddingNewCategory = { isAddingNewCategory = it },
-                    unitOptions = unitOptions,
-                    predefinedCategories = predefinedCategories,
-                    userIngredientsViewModel = userIngredientsViewModel,
-                    snackbarHostState = snackbarHostState,
-                    pagerState = pagerState
-                )
+    AlertDialog(onDismissRequest = onDismiss, title = {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(if (formState.isEditing) "Edit Ingredient" else "Add Ingredient")
+            Spacer(modifier = Modifier.weight(1f))
+            if (formState.isEditing) {
+                IconButton(onClick = {
+                    val ingredient = ingredientFormatter(formState, userIngredientsViewModel)
+                    userIngredientsViewModel.deleteIngredient(ingredient)
+                    coroutineScope.launch {
+                        snackbarHostState.showSnackbar("Ingredient deleted successfully")
+                    }
+                    formState = IngredientFormState()
+                    onDismiss()
+                }) {
+                    Icon(
+                        imageVector = Icons.Outlined.Delete,
+                        contentDescription = "Delete item",
+                        tint = MaterialTheme.colorScheme.error
+                    )
+                }
+            }
 
-                Spacer(modifier = Modifier.height(16.dp))
+        }
+    }, text = {
+        if (isTablet) {
+            TabletLayout(
+                formState = formState,
+                onFormStateChange = { formState = it },
+                nameError = nameError,
+                quantityError = quantityError,
+                showDatePicker = showDatePicker,
+                onShowDatePicker = { showDatePicker = it },
+                showUnitMenu = showUnitMenu,
+                onShowUnitMenu = { showUnitMenu = it },
+                showCategoryMenu = showCategoryMenu,
+                onShowCategoryMenu = { showCategoryMenu = it },
+                onIsAddingNewCategory = { isAddingNewCategory = it },
+                unitOptions = unitOptions,
+                predefinedCategories = predefinedCategories,
+                userIngredientsViewModel = userIngredientsViewModel,
+                snackbarHostState = snackbarHostState
+            )
+        } else {
+            PhoneLayout(
+                formState = formState,
+                onFormStateChange = { formState = it },
+                nameError = nameError,
+                quantityError = quantityError,
+                showDatePicker = showDatePicker,
+                onShowDatePicker = { showDatePicker = it },
+                showUnitMenu = showUnitMenu,
+                onShowUnitMenu = { showUnitMenu = it },
+                showCategoryMenu = showCategoryMenu,
+                onShowCategoryMenu = { showCategoryMenu = it },
+                onIsAddingNewCategory = { isAddingNewCategory = it },
+                unitOptions = unitOptions,
+                predefinedCategories = predefinedCategories,
+                userIngredientsViewModel = userIngredientsViewModel,
+                snackbarHostState = snackbarHostState,
+                pagerState = pagerState
+            )
 
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    repeat(pagerState.pageCount) { index ->
-                        Box(
-                            modifier = Modifier
-                                .size(8.dp)
-                                .background(
-                                    if (index == currentPage) InfoColor else Color.Gray,
-                                    shape = CircleShape
-                                )
-                        )
-                        if (index < pagerState.pageCount - 1) {
-                            Spacer(modifier = Modifier.width(8.dp))
-                        }
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                repeat(pagerState.pageCount) { index ->
+                    Box(
+                        modifier = Modifier
+                            .size(8.dp)
+                            .background(
+                                if (index == currentPage) InfoColor else Color.Gray,
+                                shape = CircleShape
+                            )
+                    )
+                    if (index < pagerState.pageCount - 1) {
+                        Spacer(modifier = Modifier.width(8.dp))
                     }
                 }
-
             }
-        },
-        confirmButton = {
-            Button(
-                onClick = ::validateAndSubmit, colors = ButtonDefaults.buttonColors(InfoColor)
-            ) {
-                Text(if (formState.isEditing) "Update" else "Add")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Cancel")
-            }
-        })
+        }
+    }, confirmButton = {
+        Button(
+            onClick = ::validateAndSubmit, colors = ButtonDefaults.buttonColors(InfoColor)
+        ) {
+            Text(if (formState.isEditing) "Update" else "Add")
+        }
+    }, dismissButton = {
+        TextButton(onClick = onDismiss) {
+            Text("Cancel")
+        }
+    })
 }
 
 @Composable
@@ -363,7 +389,7 @@ fun IngredientNameInput(
             modifier = Modifier.fillMaxWidth(),
             isError = nameError,
             supportingText = if (nameError) {
-                { Text("Please enter ingredient name") }
+                { Text("Please enter ingredient name", color = Color.Red) }
             } else null,
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Text, imeAction = ImeAction.Next
@@ -447,19 +473,33 @@ fun QuantityUnitInput(
     onUnitSelected: (String) -> Unit
 ) {
     Row(modifier = Modifier.fillMaxWidth()) {
+        var isNumber by remember { mutableStateOf(true) }
         OutlinedTextField(
             value = quantity,
-            onValueChange = onQuantityChange,
+            onValueChange = { newValue ->
+                if (newValue.isEmpty() || newValue.matches(Regex("^\\d*\\.?\\d*$"))) {
+                    onQuantityChange(newValue)
+                }
+                isNumber = newValue.matches(Regex("^\\d*\\.?\\d*$"))
+            },
             label = { Text("Quantity") },
             modifier = Modifier.weight(1f),
             isError = quantityError,
-            supportingText = if (quantityError) {
-                { Text("Please enter quantity") }
-            } else null,
+            supportingText = {
+                Column {
+                    if (quantityError) {
+                        Text("Please enter quantity", color = Color.Red)
+                    }
+                    if (!isNumber) {
+                        Text("Please Enter Number", color = Color.Red)
+                    }
+                }
+            },
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Number, imeAction = ImeAction.Next
             ),
-            singleLine = true)
+            singleLine = true
+        )
 
         Spacer(modifier = Modifier.width(8.dp))
 
@@ -493,31 +533,6 @@ fun QuantityUnitInput(
                 }
             }
         }
-    }
-}
-
-private fun addNewIngredient(
-    formState: IngredientFormState,
-    viewModel: UserIngredientsViewModel,
-    coroutineScope: CoroutineScope,
-    snackbarHostState: SnackbarHostState
-) {
-    val newIngredient = UserIngredients(
-        name = formState.name.trim(),
-        quantity = formState.quantity.trim(),
-        unit = formState.unit,
-        foodCategory = formState.category,
-        expirationDate = formState.expirationDate.trim(),
-        location = formState.location,
-        notes = formState.notes.trim(),
-        isFavorite = formState.isFavorite,
-        userId = viewModel.getCurrentUserId()
-    )
-
-    viewModel.addIngredient(newIngredient)
-
-    coroutineScope.launch {
-        snackbarHostState.showSnackbar("Ingredient added successfully")
     }
 }
 
@@ -829,12 +844,10 @@ fun PhoneLayout(
     }
 }
 
-private fun updateIngredient(
+private fun ingredientFormatter(
     formState: IngredientFormState,
     viewModel: UserIngredientsViewModel,
-    coroutineScope: CoroutineScope,
-    snackbarHostState: SnackbarHostState
-) {
+): UserIngredients {
 
     val updatedIngredient = UserIngredients(
         id = formState.id,
@@ -849,11 +862,5 @@ private fun updateIngredient(
         isFavorite = formState.isFavorite,
         userId = viewModel.getCurrentUserId()
     )
-
-
-    viewModel.updateIngredient(updatedIngredient)
-
-    coroutineScope.launch {
-        snackbarHostState.showSnackbar("Ingredient updated successfully")
-    }
+    return updatedIngredient
 }

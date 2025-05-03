@@ -13,10 +13,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material3.Card
@@ -28,6 +31,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.cs501.pantrypal.R
@@ -72,11 +76,49 @@ fun MyPantryCard(
             if (ingredients.isEmpty()) {
                 EmptyPantryMessage()
             } else {
-                IngredientsRow(ingredients, onIngredientClick)
+                val isTablet = LocalConfiguration.current.screenWidthDp >= 600
+                if (isTablet) {
+                    TabletIngredientsLayout(ingredients, onIngredientClick)
+                } else {
+                    IngredientsRow(ingredients, onIngredientClick)
+                }
             }
         }
     }
 }
+
+@Composable
+fun TabletIngredientsLayout(
+    ingredients: List<UserIngredients>, onIngredientClick: (ingredient: UserIngredients) -> Unit
+) {
+    val groupedIngredients = ingredients.groupBy { it.foodCategory }
+    val scrollState = rememberScrollState()
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .fillMaxHeight()
+            .verticalScroll(scrollState)
+    ) {
+        groupedIngredients.forEach { (category, categoryIngredients) ->
+            Text(
+                text = category,
+                style = Typography.titleMedium,
+                modifier = Modifier.padding(vertical = 8.dp, horizontal = 4.dp)
+            )
+
+            LazyRow(
+                modifier = Modifier
+            ) {
+                items(categoryIngredients) { ingredient ->
+                    IngredientItem(ingredient, onIngredientClick)
+                }
+            }
+
+        }
+    }
+}
+
 
 @Composable
 fun EmptyPantryMessage() {
@@ -95,8 +137,7 @@ fun EmptyPantryMessage() {
 
 @Composable
 fun IngredientsRow(
-    ingredients: List<UserIngredients>,
-    onIngredientClick: (ingredient: UserIngredients) -> Unit
+    ingredients: List<UserIngredients>, onIngredientClick: (ingredient: UserIngredients) -> Unit
 ) {
     LazyVerticalGrid(
         columns = GridCells.Adaptive(minSize = 100.dp),
@@ -116,12 +157,10 @@ fun IngredientsRow(
 
 @Composable
 fun IngredientItem(
-    ingredient: UserIngredients,
-    onIngredientClick: (ingredient: UserIngredients) -> Unit
+    ingredient: UserIngredients, onIngredientClick: (ingredient: UserIngredients) -> Unit
 ) {
     Card(
         modifier = Modifier
-            .width(150.dp)
             .padding(end = 8.dp)
             .clickable(enabled = true) {
                 onIngredientClick(ingredient)
@@ -130,16 +169,6 @@ fun IngredientItem(
         Column(
             modifier = Modifier.padding(8.dp), horizontalAlignment = Alignment.CenterHorizontally
         ) {
-//            Icon(
-//                imageVector = FOOD_IMAGES[ingredient.foodCategory],
-//                contentDescription = ingredient.name,
-//                modifier = Modifier
-//                    .size(80.dp)
-//                    .clip(RoundedCornerShape(8.dp))
-//                    .background(BackgroundLight)
-//                    .padding(8.dp),
-//                tint = InfoColor
-//            )
             Icon(
                 painter = painterResource(
                     id = FOOD_IMAGES[ingredient.foodCategory] ?: R.drawable.grocery
