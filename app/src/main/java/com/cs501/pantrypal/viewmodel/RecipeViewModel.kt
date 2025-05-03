@@ -311,6 +311,12 @@ class RecipeViewModel(application: Application) : BaseViewModel(application) {
         }
     }
 
+//    var selectedApiRecipe by mutableStateOf<Recipe?>(null)
+//
+//    fun selectApiRecipe(recipe: Recipe) {
+//        selectedApiRecipe = recipe
+//    }
+
     fun Recipe.toSavedRecipe(
         userId: String,
         isFavorite: Boolean = false,
@@ -334,7 +340,10 @@ class RecipeViewModel(application: Application) : BaseViewModel(application) {
             image = this.image,
             ingredientLines = this.ingredientLines,
             uri = this.url,
-            calories = this.calories
+            calories = this.calories,
+            yield = 0.0,
+            totalTime = 0.0,
+            cuisineType = listOf()
         )
     }
 

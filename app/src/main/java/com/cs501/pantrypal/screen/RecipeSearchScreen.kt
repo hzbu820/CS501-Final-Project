@@ -235,6 +235,7 @@ fun TabletRecipeSearchLayout(
                                 .fillMaxWidth()
                                 .clickable {
                                     viewModel.selectedRecipe = recipe
+                                    //viewModel.selectApiRecipe(recipe)
                                     navController.navigate("detail")
                                 }
                         ) {
@@ -493,14 +494,6 @@ fun PhoneRecipeSearchLayout(
                                         .padding(bottom = 8.dp)
                                 )
 
-//                                Text(
-//                                    text = recipe.calories.toString() + " calories",
-//                                    style = MaterialTheme.typography.titleMedium,
-//                                    modifier = Modifier
-//                                        .fillMaxWidth()
-//                                        .padding(bottom = 8.dp),
-//                                    color = PrimaryLight
-//                                )
                                 Text(
                                     text = buildAnnotatedString {
                                         withStyle(style = SpanStyle(color = Color(0xFF388E3C))) { // ✅ 绿色数字
@@ -541,33 +534,7 @@ fun PhoneRecipeSearchLayout(
                                 }
                             }
                         }
-//                        Column {
-//                            Text(recipe.label, style = MaterialTheme.typography.titleMedium)
-//                            AsyncImage(model = recipe.image, contentDescription = null)
-//
-//                            Row(
-//                                verticalAlignment = Alignment.CenterVertically,
-//                                modifier = Modifier.padding(8.dp)
-//                            ) {
-//                                TextButton(
-//                                    onClick = {
-//                                        coroutineScope.launch {
-//                                            val exists = viewModel.isRecipeInCookbook(recipe.uri, "Default")
-//                                            if (exists) {
-//                                                snackbarHostState.showSnackbar("Already added to Default!")
-//                                                //isSavedInDefault = false
-//                                            } else {
-//                                                // 如果没保存过，才保存
-//                                                viewModel.saveRecipeToCookbook(recipe, "Default")
-//                                                snackbarHostState.showSnackbar("Saved to Default!")
-//                                            }
-//                                        }
-//                                    }
-//                                ) {
-//                                    Text( "Save", style = MaterialTheme.typography.labelMedium)
-//                                }
-//                            }
-//                        }
+
                     }
                 }
             }

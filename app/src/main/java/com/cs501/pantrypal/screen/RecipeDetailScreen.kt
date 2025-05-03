@@ -147,6 +147,25 @@ fun RecipeDetailScreen(viewModel: RecipeViewModel, navController: NavController)
                         .fillMaxWidth()
                         .padding(bottom = 8.dp)
                 )
+                Spacer(modifier = Modifier.height(8.dp))
+
+                if (recipe.yield > 0) {
+                    Text("Yield: ${recipe.yield} servings", style = MaterialTheme.typography.bodyLarge)
+                }
+
+                if (recipe.totalTime > 0) {
+                    Text("Total Time: ${recipe.totalTime} minutes", style = MaterialTheme.typography.bodyLarge)
+                }
+
+                if (recipe.cuisineType.isNotEmpty()) {
+                    Text(
+                        text = "Cuisine: ${recipe.cuisineType.joinToString()}",
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
                 //Text(recipe.uri)
                 Text("Ingredients:",  fontWeight = FontWeight.Bold)
             }
