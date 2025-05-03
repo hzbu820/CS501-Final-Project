@@ -18,6 +18,12 @@ import com.cs501.pantrypal.data.model.Recipe
 import com.cs501.pantrypal.util.Constants
 import com.cs501.pantrypal.viewmodel.RecipeViewModel
 import kotlinx.coroutines.launch
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.graphics.Color
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -36,6 +42,7 @@ fun RecipeDetailScreen(viewModel: RecipeViewModel, navController: NavController)
     val currentSavedRecipe = remember(savedRecipes) {
         savedRecipes.firstOrNull { it.url == recipe.uri }
     }
+    val formattedCalories = String.format("%.2f", recipe.calories)
 
     LaunchedEffect(Unit) {
         viewModel.loadCookbooks()
@@ -125,7 +132,23 @@ fun RecipeDetailScreen(viewModel: RecipeViewModel, navController: NavController)
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text("Description", fontWeight = FontWeight.Bold)
-                Text("Ingredients:")
+                Text(
+                    text = buildAnnotatedString {
+                        withStyle(style = SpanStyle(color = Color(0xFF388E3C))) { // ✅ 绿色数字
+                            append(formattedCalories)
+                        }
+                        append(" ")
+                        withStyle(style = SpanStyle(color = Color.Black)) { // ✅ 黑色单位
+                            append("calories")
+                        }
+                    },
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp)
+                )
+                //Text(recipe.uri)
+                Text("Ingredients:",  fontWeight = FontWeight.Bold)
             }
 
             items(recipe.ingredientLines) { line ->

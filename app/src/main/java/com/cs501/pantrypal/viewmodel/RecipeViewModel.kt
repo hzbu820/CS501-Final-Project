@@ -321,7 +321,7 @@ class RecipeViewModel(application: Application) : BaseViewModel(application) {
             image = this.image,
             url = this.uri,
             ingredientLines = this.ingredientLines,
-            calories = 0.0,
+            calories = this.calories,
             isFavorite = isFavorite,
             userId = userId,
             cookbookName = cookbookName
@@ -333,7 +333,8 @@ class RecipeViewModel(application: Application) : BaseViewModel(application) {
             label = this.label,
             image = this.image,
             ingredientLines = this.ingredientLines,
-            uri = this.url
+            uri = this.url,
+            calories = this.calories
         )
     }
 

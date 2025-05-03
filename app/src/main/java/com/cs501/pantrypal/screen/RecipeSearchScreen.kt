@@ -28,6 +28,13 @@ import com.cs501.pantrypal.util.ShakeSensorManager
 import com.cs501.pantrypal.viewmodel.RecipeViewModel
 import kotlinx.coroutines.launch
 
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.graphics.Color
+
 @Composable
 fun RecipeSearchScreen(viewModel: RecipeViewModel, navController: NavController, snackbarHostState: SnackbarHostState) {
     val configuration = LocalConfiguration.current
@@ -41,6 +48,8 @@ fun RecipeSearchScreen(viewModel: RecipeViewModel, navController: NavController,
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val shakeSensorManager = remember { ShakeSensorManager(context) }
+
+
     
     // Register and unregister the sensor when the composable enters/leaves composition
     DisposableEffect(shakeSensorManager) {
@@ -218,6 +227,8 @@ fun TabletRecipeSearchLayout(
                 ) {
                     items(viewModel.recipes) { recipe ->
                         //val isSaved = viewModel.isRecipeSaved(recipe)
+                        val formattedCalories = String.format("%.2f", recipe.calories)
+
                         Card(
                             modifier = Modifier
                                 .padding(8.dp)
@@ -250,6 +261,22 @@ fun TabletRecipeSearchLayout(
                                     Text(
                                         text = recipe.label,
                                         style = MaterialTheme.typography.headlineMedium,
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(bottom = 8.dp)
+                                    )
+
+                                    Text(
+                                        text = buildAnnotatedString {
+                                            withStyle(style = SpanStyle(color = Color(0xFF388E3C))) { // ✅ 绿色数字
+                                                append(formattedCalories)
+                                            }
+                                            append(" ")
+                                            withStyle(style = SpanStyle(color = Color.Black)) { // ✅ 黑色单位
+                                                append("calories")
+                                            }
+                                        },
+                                        style = MaterialTheme.typography.titleMedium,
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .padding(bottom = 8.dp)
@@ -344,6 +371,7 @@ fun PhoneRecipeSearchLayout(
 ) {
     val coroutineScope = rememberCoroutineScope()
 
+
     Column(modifier = Modifier.padding(16.dp)) {
         Text("Discover Recipes", style = Typography.displayLarge)
         Spacer(modifier = Modifier.height(16.dp))
@@ -425,6 +453,7 @@ fun PhoneRecipeSearchLayout(
             LazyColumn {
                 items(viewModel.recipes) { recipe ->
                     val coroutineScope = rememberCoroutineScope()
+                    val formattedCalories = String.format("%.2f", recipe.calories)
 
 
                     Card(
@@ -459,6 +488,30 @@ fun PhoneRecipeSearchLayout(
                                 Text(
                                     text = recipe.label,
                                     style = MaterialTheme.typography.titleLarge,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(bottom = 8.dp)
+                                )
+
+//                                Text(
+//                                    text = recipe.calories.toString() + " calories",
+//                                    style = MaterialTheme.typography.titleMedium,
+//                                    modifier = Modifier
+//                                        .fillMaxWidth()
+//                                        .padding(bottom = 8.dp),
+//                                    color = PrimaryLight
+//                                )
+                                Text(
+                                    text = buildAnnotatedString {
+                                        withStyle(style = SpanStyle(color = Color(0xFF388E3C))) { // ✅ 绿色数字
+                                            append(formattedCalories)
+                                        }
+                                        append(" ")
+                                        withStyle(style = SpanStyle(color = Color.Black)) { // ✅ 黑色单位
+                                            append("calories")
+                                        }
+                                    },
+                                    style = MaterialTheme.typography.titleMedium,
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .padding(bottom = 8.dp)
