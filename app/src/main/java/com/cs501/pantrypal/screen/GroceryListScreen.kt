@@ -685,12 +685,9 @@ fun GroceryItemCard(
             }
 
             if (groceryItem.isChecked) {
-                IconButton(onClick = { addToPantry(groceryItem) }) {
-                    Icon(
-                        imageVector = Icons.Outlined.Add,
-                        contentDescription = "Add item",
-                        tint = InfoColor
-                    )
+                TextButton(onClick = { addToPantry(groceryItem) }) {
+
+                    Text("Add to Pantry", color = InfoColor)
                 }
             } else {
                 IconButton(onClick = { onDeleteItem(groceryItem) }) {
@@ -766,8 +763,8 @@ fun AddGroceryItemDialog(
 ) {
     var name by remember { mutableStateOf("") }
     var quantity by remember { mutableStateOf("") }
-    var unit by remember { mutableStateOf("") }
-    var category by remember { mutableStateOf("") }
+    var unit by remember { mutableStateOf("g") }
+    var category by remember { mutableStateOf("Default") }
 
     // Unit dropdown options from Constants
     val unitOptions = Constants.MEASUREMENT_UNITS
@@ -778,6 +775,7 @@ fun AddGroceryItemDialog(
     var expandedCategoryMenu by remember { mutableStateOf(false) }
 
     val isFormValid = name.isNotBlank()
+    var isNumeric by remember { mutableStateOf(true) }
 
     AlertDialog(onDismissRequest = onDismiss, title = {
         Text(
@@ -805,12 +803,26 @@ fun AddGroceryItemDialog(
             // Quantity field
             OutlinedTextField(
                 value = quantity,
-                onValueChange = { quantity = it },
+                onValueChange = { newValue ->
+                    if (newValue.isEmpty() || newValue.matches(Regex("^\\d*\\.?\\d*$"))) {
+                        quantity = newValue
+                        isNumeric = true
+                    } else isNumeric = false
+                                },
                 label = { Text("Quantity") },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 8.dp),
                 singleLine = true,
+                supportingText = {
+                    if (!isNumeric) {
+                        Text(
+                            text = "Please enter a valid number",
+                            color = ErrorColor,
+                            style = Typography.bodySmall
+                        )
+                    }
+                },
                 keyboardOptions = KeyboardOptions(
                     imeAction = ImeAction.Next, keyboardType = KeyboardType.Number
                 )
