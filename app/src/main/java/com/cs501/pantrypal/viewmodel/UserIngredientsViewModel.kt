@@ -89,13 +89,15 @@ class UserIngredientsViewModel(application: Application) : BaseViewModel(applica
             setEmptyBarcodeIngredient()
             val foodResponse = repository.searchIngredientsByBarcode(query)
 
-
-            _ingredientsByBarcode.value = UserIngredients(
-                userId = getCurrentUserId(),
-                name = foodResponse.food.food_name,
-                image = foodResponse.food_images?.food_image[0]?.image_url ?: "",
-            )
-
+            if (foodResponse != null) {
+                _ingredientsByBarcode.value = UserIngredients(
+                    userId = getCurrentUserId(),
+                    name = foodResponse.food.food_name,
+                    image = foodResponse.food.food_images?.food_image?.get(0)?.image_url ?: "",
+                )
+            } else {
+                setEmptyBarcodeIngredient()
+            }
         }
     }
 

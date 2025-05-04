@@ -34,6 +34,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import com.cs501.pantrypal.R
 import com.cs501.pantrypal.data.database.UserIngredients
 import com.cs501.pantrypal.ui.theme.BackgroundLight
@@ -169,18 +170,33 @@ fun IngredientItem(
         Column(
             modifier = Modifier.padding(8.dp), horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Icon(
-                painter = painterResource(
-                    id = FOOD_IMAGES[ingredient.foodCategory] ?: R.drawable.grocery
-                ),
-                contentDescription = ingredient.foodCategory,
-                modifier = Modifier
-                    .size(80.dp)
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(BackgroundLight)
-                    .padding(8.dp),
-                tint = Color.Unspecified
-            )
+            if (ingredient.image != "") {
+                AsyncImage(
+                    model = ingredient.image,
+                    contentDescription = ingredient.name,
+                    modifier = Modifier
+                        .size(80.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(BackgroundLight)
+                        .padding(8.dp),
+                    error = painterResource(id = R.drawable.grocery),
+                    placeholder = painterResource(id = R.drawable.grocery)
+                )
+            } else {
+                Icon(
+                    painter = painterResource(
+                        id = FOOD_IMAGES[ingredient.foodCategory] ?: R.drawable.grocery
+                    ),
+                    contentDescription = ingredient.foodCategory,
+                    modifier = Modifier
+                        .size(80.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(BackgroundLight)
+                        .padding(8.dp),
+                    tint = Color.Unspecified
+                )
+            }
+
 
             Spacer(modifier = Modifier.height(4.dp))
 

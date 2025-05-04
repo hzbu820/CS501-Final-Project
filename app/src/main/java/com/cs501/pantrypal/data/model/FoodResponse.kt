@@ -1,12 +1,13 @@
 package com.cs501.pantrypal.data.model
 
 data class FoodResponse(
-    val food: Food, val food_images: FoodImages? = null
+    val food: Food
 )
 
 data class Food(
-    val food_id: String, val food_name: String
-
+    val food_id: String,
+    val food_name: String,
+    val food_images: FoodImages? = null,
 )
 
 data class FoodImages(

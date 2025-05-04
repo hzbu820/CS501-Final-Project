@@ -1,7 +1,10 @@
 package com.cs501.pantrypal.screen.profilePage.components
 
 import android.Manifest
+import android.content.pm.PackageManager
 import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -62,6 +65,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import com.cs501.pantrypal.data.database.UserIngredients
 import com.cs501.pantrypal.ui.theme.InfoColor
 import com.cs501.pantrypal.util.Constants
@@ -342,43 +346,61 @@ fun DatePick(
 fun IngredientNameInput(
     name: String,
     onNameChange: (String) -> Unit,
-    onImageChange: (String) -> Unit,
+    onBarcodeChange: (String, String) -> Unit,
     nameError: Boolean,
     snackbarHostState: SnackbarHostState,
     userIngredientsViewModel: UserIngredientsViewModel,
 ) {
     val context = LocalContext.current
-    var imageUri by remember { mutableStateOf<Uri?>(null) }
     val errorMessage = remember { mutableStateOf("") }
+    var imageUri by remember { mutableStateOf<Uri?>(null) }
     val coroutineScope = rememberCoroutineScope()
 
-    val (hasCameraPermission, cameraPermissionLauncher) = checkCameraPermission(snackbarHostState)
+    var hasCameraPermission by remember {
+        mutableStateOf(
+            ContextCompat.checkSelfPermission(
+                context, Manifest.permission.CAMERA
+            ) == PackageManager.PERMISSION_GRANTED
+        )
+    }
 
-    val cameraLauncher = cameraPicker(
-        snackbarHostState = snackbarHostState, onImageCaptured = { uri ->
-            imageUri = uri
-            try {
-                val image = InputImage.fromFilePath(context, uri)
-                scanBarcode(
-                    image, userIngredientsViewModel, onNameChange, onImageChange
-                ) { error ->
-                    coroutineScope.launch {
-                        errorMessage.value = error
-                    }
-                }
-            } catch (e: Exception) {
+    // Get camera permission
+    val cameraPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(), onResult = { isGranted ->
+            hasCameraPermission = isGranted
+            if (!isGranted) {
                 coroutineScope.launch {
-                    snackbarHostState.showSnackbar("Error: ${e.message}")
+                    errorMessage.value = "Camera permission is required to scan barcodes"
                 }
             }
         })
 
-    Box(modifier = Modifier.fillMaxWidth()) {
-        if (errorMessage.value != "") {
-            Text(
-                text = errorMessage.value, color = Color.Red, modifier = Modifier.padding(8.dp)
-            )
+    // Launch camera to take picture
+    val cameraLauncher =
+        rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { success ->
+            if (success && imageUri != null) {
+                // Process the image
+                try {
+                    val image = InputImage.fromFilePath(context, imageUri!!)
+                    scanBarcode(
+                        image,
+                        userIngredientsViewModel,
+                        onNameChange,
+                        onBarcodeChange
+                    ) { error ->
+                        coroutineScope.launch {
+                            errorMessage.value = error
+                        }
+                    }
+                } catch (e: Exception) {
+                    coroutineScope.launch {
+                        snackbarHostState.showSnackbar("Failed to process image: ${e.message}")
+                    }
+                }
+            }
         }
+
+    Box(modifier = Modifier.fillMaxWidth()) {
         OutlinedTextField(
             value = name,
             onValueChange = {
@@ -387,10 +409,17 @@ fun IngredientNameInput(
             },
             label = { Text("Ingredient Name") },
             modifier = Modifier.fillMaxWidth(),
-            isError = nameError,
-            supportingText = if (nameError) {
-                { Text("Please enter ingredient name", color = Color.Red) }
-            } else null,
+            isError = nameError || errorMessage.value.isNotEmpty(),
+            supportingText = {
+                Column {
+                    if (nameError) {
+                        Text("Please enter ingredient name", color = Color.Red)
+                    }
+                    if (errorMessage.value.isNotEmpty()) {
+                        Text(errorMessage.value, color = Color.Red)
+                    }
+                }
+            },
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Text, imeAction = ImeAction.Next
             ),
@@ -398,18 +427,21 @@ fun IngredientNameInput(
             trailingIcon = {
                 Row {
                     IconButton(onClick = {
+                        errorMessage.value = ""
                         if (!hasCameraPermission) {
                             cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
                         } else {
                             imageUri = createTempImageUri(context)
                             imageUri?.let { uri ->
                                 cameraLauncher.launch(uri)
+                                print("Image URI: $imageUri")
+                                println("Image URI: $imageUri")
                             }
                         }
                     }) {
                         Icon(
                             imageVector = Icons.Default.QrCodeScanner,
-                            contentDescription = "Scan Barcode",
+                            contentDescription = "scan barcode",
                             tint = InfoColor
                         )
                     }
@@ -569,10 +601,12 @@ fun TabletLayout(
                 IngredientNameInput(
                     name = formState.name,
                     onNameChange = { onFormStateChange(formState.copy(name = it)) },
+                    onBarcodeChange = { name, img ->
+                        onFormStateChange(formState.copy(image = img, name = name))
+                    },
                     nameError = nameError,
                     snackbarHostState = snackbarHostState,
-                    userIngredientsViewModel = userIngredientsViewModel,
-                    onImageChange = { onFormStateChange(formState.copy(image = it)) },
+                    userIngredientsViewModel = userIngredientsViewModel
                 )
             }
 
@@ -725,10 +759,12 @@ fun PhoneLayout(
                                 IngredientNameInput(
                                     name = formState.name,
                                     onNameChange = { onFormStateChange(formState.copy(name = it)) },
+                                    onBarcodeChange = { name, img ->
+                                        onFormStateChange(formState.copy(image = img, name = name))
+                                    },
                                     nameError = nameError,
                                     snackbarHostState = snackbarHostState,
-                                    userIngredientsViewModel = userIngredientsViewModel,
-                                    onImageChange = { onFormStateChange(formState.copy(image = it)) },
+                                    userIngredientsViewModel = userIngredientsViewModel
                                 )
                             }
 

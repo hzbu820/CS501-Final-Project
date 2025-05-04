@@ -25,8 +25,7 @@ class UserIngredientsRepository(private val userIngredientsDao: UserIngredientsD
      * Search ingredients by user ID
      */
     fun searchIngredientsByUserId(
-        searchQuery: String,
-        userId: String
+        searchQuery: String, userId: String
     ): Flow<List<UserIngredients>> {
         return userIngredientsDao.searchIngredientsByUserId(searchQuery, userId)
     }
@@ -35,8 +34,7 @@ class UserIngredientsRepository(private val userIngredientsDao: UserIngredientsD
      * Search ingredients by user ID and food category
      */
     fun searchIngredientsByUserIdAndName(
-        category: String,
-        userId: String
+        category: String, userId: String
     ): Flow<List<UserIngredients>> {
         return userIngredientsDao.searchIngredientsByUserIdAndCategory(category, userId)
     }
@@ -45,8 +43,7 @@ class UserIngredientsRepository(private val userIngredientsDao: UserIngredientsD
      * Search ingredients by user ID and expiration date
      */
     fun searchIngredientsByUserIdAndExpirationDate(
-        expirationDate: String,
-        userId: String
+        expirationDate: String, userId: String
     ): Flow<List<UserIngredients>> {
         return userIngredientsDao.searchIngredientsByUserIdAndExpirationDate(expirationDate, userId)
     }
@@ -75,7 +72,7 @@ class UserIngredientsRepository(private val userIngredientsDao: UserIngredientsD
     /**
      * Search ingredients by Barcode
      */
-    suspend fun searchIngredientsByBarcode(barcode: String): FoodResponse {
+    suspend fun searchIngredientsByBarcode(barcode: String): FoodResponse? {
         // Get barcode's length to check if it there should be a leading zero
         val leadingZero = when (barcode.length) {
             12 -> "0"
@@ -83,16 +80,19 @@ class UserIngredientsRepository(private val userIngredientsDao: UserIngredientsD
         }
         // Add leading zero if needed
         val formattedBarcode = leadingZero + barcode
-        val response = ApiClient.foodRetrofit.searchIdByCode(barcode = formattedBarcode)
-        val foodId = response.food_id.value.toLong()
-        val foodResponse = ApiClient.foodRetrofit.searchFoodById(foodId = foodId.toLong())
-        val parsedFoodResponse = foodResponse.copy(
-            food = foodResponse.food.copy(
-                food_name = foodResponse.food.food_name, food_id = foodResponse.food.food_id
-            ), food_images = foodResponse.food_images
-        )
+        try {
+            val response = ApiClient.foodRetrofit.searchIdByCode(barcode = formattedBarcode)
+            val foodId = response.food_id.value.toLong()
+            val foodResponse = ApiClient.foodRetrofit.searchFoodById(foodId = foodId)
 
-        return parsedFoodResponse
+            if (foodResponse.food != null && foodResponse.food.food_name.isNotEmpty()) {
+                return foodResponse
+            }
+            return null
+        } catch (e: Exception) {
+            println("Error fetching food data: ${e.message}")
+            return null
+        }
     }
 
     suspend fun deleteAllIngredientsByUserId(userId: String) {
@@ -100,7 +100,7 @@ class UserIngredientsRepository(private val userIngredientsDao: UserIngredientsD
     }
 
     suspend fun updateAllIngredients(ingredients: List<UserIngredients>) {
-        for( ingredient in ingredients) {
+        for (ingredient in ingredients) {
             userIngredientsDao.insertIngredient(ingredient)
         }
     }

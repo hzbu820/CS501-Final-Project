@@ -1,8 +1,6 @@
 package com.cs501.pantrypal.screen.profilePage.components
 
-import android.Manifest
 import android.content.Context
-import android.content.pm.PackageManager
 import android.net.Uri
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -11,7 +9,6 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
-import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import com.cs501.pantrypal.viewmodel.UserIngredientsViewModel
 import com.cs501.pantrypal.viewmodel.UserViewModel
@@ -20,8 +17,11 @@ import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.common.InputImage
 import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeout
 import java.io.File
 
 @Composable
@@ -69,37 +69,13 @@ fun photoPicker(
     })
 }
 
-@Composable
-fun cameraPicker(
-    snackbarHostState: SnackbarHostState, onImageCaptured: (Uri) -> Unit
-): ManagedActivityResultLauncher<Uri, Boolean> {
-    val context = LocalContext.current
-    val coroutineScope = rememberCoroutineScope()
-
-    return rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.TakePicture()
-    ) { success ->
-        if (success) {
-            try {
-                val imageUri = createTempImageUri(context)
-                imageUri?.let { uri ->
-                    onImageCaptured(uri)
-                }
-            } catch (e: Exception) {
-                coroutineScope.launch {
-                    snackbarHostState.showSnackbar("Failed to process image: ${e.message}")
-                }
-            }
-        }
+fun createTempImageUri(context: Context): Uri {
+    val tempFile = File(context.cacheDir, "barcode_temp.jpg")
+    if (tempFile.exists()) {
+        tempFile.delete()
     }
-}
+    tempFile.createNewFile()
 
-fun createTempImageUri(context: Context): Uri? {
-    val tempFile = File.createTempFile(
-        "barcode_", ".jpg", context.cacheDir
-    ).apply {
-        deleteOnExit()
-    }
     return FileProvider.getUriForFile(
         context, "${context.packageName}.fileprovider", tempFile
     )
@@ -109,7 +85,7 @@ fun scanBarcode(
     image: InputImage,
     userIngredientsViewModel: UserIngredientsViewModel,
     onNameChange: (String) -> Unit,
-    onImageChange: (String) -> Unit,
+    onBarcodeChange: (String, String) -> Unit,
     onError: (String) -> Unit
 ) {
     val options = BarcodeScannerOptions.Builder().setBarcodeFormats(
@@ -122,58 +98,43 @@ fun scanBarcode(
 
     val scanner = BarcodeScanning.getClient(options)
 
+    onNameChange("Handling barcode scanning...")
+
     scanner.process(image).addOnSuccessListener { barcodes ->
         if (barcodes.isNotEmpty()) {
             val barcode = barcodes[0]
             barcode.rawValue?.let { value ->
-                onNameChange("Loading product info...")
+                onNameChange("Loading Item's name: $value")
 
                 MainScope().launch {
                     try {
+                        userIngredientsViewModel.setEmptyBarcodeIngredient()
+
                         userIngredientsViewModel.searchIngredientsByApi(value)
-                        delay(500)
-                        val result = userIngredientsViewModel.ingredientsByBarcode.value
-                        if (result.name.isNotEmpty()) {
-                            onNameChange(result.name)
-                            onImageChange(result.image)
-                        } else {
-                            onNameChange("Product: $value")
-                            onError("Product found but no details available")
+
+                        try {
+                            withTimeout(6000L) {
+                                val result =
+                                    userIngredientsViewModel.ingredientsByBarcode.filter { it.name.isNotEmpty() && it.userId.isNotEmpty() }
+                                        .first()
+
+                                onBarcodeChange(result.name, result.image)
+                            }
+                        } catch (e: TimeoutCancellationException) {
+                            onError("Product lookup timed out. Try again.")
                         }
                     } catch (e: Exception) {
-                        onNameChange("Scanned: $value")
                         onError("Error loading product: ${e.message}")
                     }
                 }
             }
         } else {
-            onError("No barcode found")
+            onNameChange("")
+            onError("Cannot find barcode")
         }
     }.addOnFailureListener { e ->
-        onError("Failed to scan barcode: ${e.message}")
+        onNameChange("")
+        onError("Barcode scan error: ${e.message}")
     }
 }
 
-@Composable
-fun checkCameraPermission(
-    snackbarHostState: SnackbarHostState
-): Pair<Boolean, ManagedActivityResultLauncher<String, Boolean>> {
-    val context = LocalContext.current
-    val coroutineScope = rememberCoroutineScope()
-
-    val hasCameraPermission = ContextCompat.checkSelfPermission(
-        context, Manifest.permission.CAMERA
-    ) == PackageManager.PERMISSION_GRANTED
-
-    val cameraPermissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        if (!isGranted) {
-            coroutineScope.launch {
-                snackbarHostState.showSnackbar("Camera permission is required to scan barcodes")
-            }
-        }
-    }
-
-    return Pair(hasCameraPermission, cameraPermissionLauncher)
-}
