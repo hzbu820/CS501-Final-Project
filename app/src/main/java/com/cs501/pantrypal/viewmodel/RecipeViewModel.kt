@@ -55,7 +55,7 @@ class RecipeViewModel(application: Application) : BaseViewModel(application) {
         repository = RecipeRepository(database.savedRecipeDao())
         userRepository = UserRepository(database.userDao())
         userIngredientsRepository = UserIngredientsRepository(database.userIngredientsDao())
-        
+        getRandomRecipes()
         viewModelScope.launch {
             loadSavedRecipes()
             loadCookbooks()
@@ -311,11 +311,7 @@ class RecipeViewModel(application: Application) : BaseViewModel(application) {
         }
     }
 
-//    var selectedApiRecipe by mutableStateOf<Recipe?>(null)
-//
-//    fun selectApiRecipe(recipe: Recipe) {
-//        selectedApiRecipe = recipe
-//    }
+
 
     fun Recipe.toSavedRecipe(
         userId: String,

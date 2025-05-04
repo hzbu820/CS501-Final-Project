@@ -309,49 +309,7 @@ fun TabletRecipeSearchLayout(
                                 }
                             }
                         }
-//                        Card(
-//                            modifier = Modifier
-//                                .padding(8.dp)
-//                                .fillMaxWidth()
-//                                .clickable {
-//                                    viewModel.selectedRecipe = recipe
-//                                    navController.navigate("detail")
-//                                }
-//                        ) {
-//                            Column {
-//                                Text(
-//                                    recipe.label,
-//                                    style = MaterialTheme.typography.titleMedium,
-//                                    modifier = Modifier.padding(8.dp)
-//                                )
-//                                AsyncImage(
-//                                    model = recipe.image,
-//                                    contentDescription = null,
-//                                    modifier = Modifier.fillMaxWidth()
-//                                )
-//                                Row(modifier = Modifier.padding(8.dp)) {
-//
-//                                    TextButton(
-//                                        onClick = {
-//                                            coroutineScope.launch {
-//                                                val exists = viewModel.isRecipeInCookbook(recipe.uri, "Default")
-//                                                if (exists) {
-//                                                    snackbarHostState.showSnackbar("Already added to Default!")
-//                                                    //isSavedInDefault = false
-//                                                } else {
-//                                                    // 如果没保存过，才保存
-//                                                    viewModel.saveRecipeToCookbook(recipe, "Default")
-//                                                    snackbarHostState.showSnackbar("Saved to Default!")
-//                                                }
-//                                            }
-//                                        }
-//                                    ) {
-//                                        Text( "Save", style = MaterialTheme.typography.labelMedium)
-//                                    }
-//
-//                                }
-//                            }
-//                        }
+
                     }
                 }
             }
