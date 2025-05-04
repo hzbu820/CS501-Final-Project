@@ -37,6 +37,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.cs501.pantrypal.AppViewModelProvider
 import com.cs501.pantrypal.ui.theme.InfoColor
 import com.cs501.pantrypal.ui.theme.Typography
 import com.cs501.pantrypal.util.PasswordCheck
@@ -46,8 +47,9 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegisterScreen(
-    userViewModel: UserViewModel, navController: NavController, snackbarHostState: SnackbarHostState
+    navController: NavController, snackbarHostState: SnackbarHostState
 ) {
+    val userViewModel: UserViewModel = AppViewModelProvider.userViewModel
     LaunchedEffect(userViewModel.isUserLoggedIn()) {
         if (userViewModel.isUserLoggedIn()) {
             navController.navigate("discover") {

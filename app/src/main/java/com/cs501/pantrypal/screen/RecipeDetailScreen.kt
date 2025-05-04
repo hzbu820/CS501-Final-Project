@@ -1,34 +1,62 @@
-
 package com.cs501.pantrypal.screen
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.cs501.pantrypal.AppViewModelProvider
 import com.cs501.pantrypal.data.model.Recipe
+import com.cs501.pantrypal.ui.theme.InfoColor
 import com.cs501.pantrypal.util.Constants
 import com.cs501.pantrypal.viewmodel.RecipeViewModel
 import kotlinx.coroutines.launch
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalConfiguration
-import com.cs501.pantrypal.ui.theme.InfoColor
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RecipeDetailScreen(viewModel: RecipeViewModel, navController: NavController) {
+fun RecipeDetailScreen(navController: NavController) {
+    val viewModel: RecipeViewModel = AppViewModelProvider.recipeViewModel
     val recipe = viewModel.selectedRecipe ?: return
     val cookbooks by viewModel.cookbooks.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -40,14 +68,11 @@ fun RecipeDetailScreen(viewModel: RecipeViewModel, navController: NavController)
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text(recipe.label, maxLines = 1) },
-                navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                    }
+            TopAppBar(title = { Text(recipe.label, maxLines = 1) }, navigationIcon = {
+                IconButton(onClick = { navController.popBackStack() }) {
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                 }
-            )
+            })
         },
 
         snackbarHost = {
@@ -77,10 +102,8 @@ fun RecipeDetailScreen(viewModel: RecipeViewModel, navController: NavController)
                             snackbarHostState.showSnackbar("Added to $cookbookName!")
                         }
                     }
-                }
-            )
-        }
-    ) { padding ->
+                })
+        }) { padding ->
         if (isTablet) {
             TabletRecipeDetailContent(recipe = recipe, padding = padding)
         } else {
@@ -117,8 +140,6 @@ fun PhoneRecipeDetailContent(recipe: Recipe, padding: PaddingValues) {
 }
 
 
-
-
 @Composable
 fun TabletRecipeDetailContent(recipe: Recipe, padding: PaddingValues) {
     val formattedCalories = String.format("%.2f", recipe.calories)
@@ -149,7 +170,6 @@ fun TabletRecipeDetailContent(recipe: Recipe, padding: PaddingValues) {
 }
 
 
-
 @Composable
 fun RecipeDescription(recipe: Recipe, formattedCalories: String) {
     Text("Description", fontWeight = FontWeight.Bold)
@@ -162,9 +182,7 @@ fun RecipeDescription(recipe: Recipe, formattedCalories: String) {
             withStyle(SpanStyle(color = Color.Black)) {
                 append("calories")
             }
-        },
-        style = MaterialTheme.typography.titleMedium,
-        modifier = Modifier.padding(bottom = 8.dp)
+        }, style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(bottom = 8.dp)
     )
 
     if (recipe.yield > 0) {
@@ -174,12 +192,13 @@ fun RecipeDescription(recipe: Recipe, formattedCalories: String) {
         Text("Total Time: ${recipe.totalTime} minutes", style = MaterialTheme.typography.bodyLarge)
     }
     if (recipe.cuisineType.isNotEmpty()) {
-        Text("Cuisine: ${recipe.cuisineType.joinToString()}", style = MaterialTheme.typography.bodyLarge)
+        Text(
+            "Cuisine: ${recipe.cuisineType.joinToString()}",
+            style = MaterialTheme.typography.bodyLarge
+        )
     }
     Spacer(modifier = Modifier.height(8.dp))
 }
-
-
 
 
 @Composable
@@ -198,20 +217,14 @@ fun AddToCookbookButton(
         ExtendedFloatingActionButton(
             onClick = { onDropdownChange(true) },
             icon = { Icon(Icons.Default.Favorite, contentDescription = "Favorite") },
-            text = { Text("Add to Cookbook") }
-        )
+            text = { Text("Add to Cookbook") })
         DropdownMenu(
-            expanded = isDropdownExpanded,
-            onDismissRequest = { onDropdownChange(false) }
-        ) {
+            expanded = isDropdownExpanded, onDismissRequest = { onDropdownChange(false) }) {
             allCookbooks.forEach { cookbookName ->
-                DropdownMenuItem(
-                    text = { Text(cookbookName) },
-                    onClick = {
-                        onDropdownChange(false)
-                        onAdd(cookbookName)
-                    }
-                )
+                DropdownMenuItem(text = { Text(cookbookName) }, onClick = {
+                    onDropdownChange(false)
+                    onAdd(cookbookName)
+                })
             }
         }
     }

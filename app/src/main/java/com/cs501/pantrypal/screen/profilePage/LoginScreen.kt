@@ -37,6 +37,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.cs501.pantrypal.AppViewModelProvider
 import com.cs501.pantrypal.ui.theme.ErrorColor
 import com.cs501.pantrypal.ui.theme.InfoColor
 import com.cs501.pantrypal.ui.theme.Typography
@@ -46,10 +47,9 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(
-    userViewModel: UserViewModel,
-    navController: NavController,
-    snackbarHostState: SnackbarHostState
+    navController: NavController, snackbarHostState: SnackbarHostState
 ) {
+    val userViewModel: UserViewModel = AppViewModelProvider.userViewModel
     // Check if the user is already logged in
     LaunchedEffect(userViewModel.isUserLoggedIn()) {
         if (userViewModel.isUserLoggedIn()) {
@@ -141,8 +141,7 @@ fun LoginScreen(
                     .fillMaxWidth()
                     .padding(vertical = 8.dp),
                 keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Text,
-                    imeAction = ImeAction.Next
+                    keyboardType = KeyboardType.Text, imeAction = ImeAction.Next
                 ),
                 singleLine = true,
             )

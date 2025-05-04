@@ -49,18 +49,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.VerticalAlignmentLine
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.cs501.pantrypal.AppViewModelProvider
 import com.cs501.pantrypal.ui.theme.ErrorColor
 import com.cs501.pantrypal.ui.theme.InfoColor
-import com.cs501.pantrypal.ui.theme.TextPrimaryDark
 import com.cs501.pantrypal.ui.theme.TextPrimaryLight
-import com.cs501.pantrypal.ui.theme.TextSecondary
 import com.cs501.pantrypal.ui.theme.TextSecondaryLight
 import com.cs501.pantrypal.ui.theme.TextTertiary
 import com.cs501.pantrypal.ui.theme.Typography
@@ -69,8 +66,9 @@ import com.cs501.pantrypal.viewmodel.RecipeViewModel
 
 @Composable
 fun CookBookScreen(
-    navController: NavController, viewModel: RecipeViewModel
+    navController: NavController
 ) {
+    val viewModel: RecipeViewModel = AppViewModelProvider.recipeViewModel
     val cookbooks by viewModel.cookbooks.collectAsState()
     var showDialog by remember { mutableStateOf(false) }
     var newCookbookName by remember { mutableStateOf("") }
@@ -98,13 +96,11 @@ fun CookBookScreen(
     if (isLoading) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text(
-                text = "Loading...",
-                style = Typography.bodyLarge,
-                color = TextPrimaryLight
+                text = "Loading...", style = Typography.bodyLarge, color = TextPrimaryLight
             )
         }
         return
-    }else {
+    } else {
         if (isTablet) {
             // Tablet layout with sidebar
             TabletCookBookLayout(
@@ -346,17 +342,20 @@ fun TabletCookBookLayout(
                 )
 
                 // Cookbooks header
-                Row(verticalAlignment= Alignment.CenterVertically) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                    text = "Customized Cookcooks",
-                    style = Typography.headlineMedium,
-                    modifier = Modifier.padding(vertical = 8.dp)
+                        text = "Customized Cookcooks",
+                        style = Typography.headlineMedium,
+                        modifier = Modifier.padding(vertical = 8.dp)
                     )
                     TextButton(
-                        onClick = {isCustomCookbooksExpanded = !isCustomCookbooksExpanded},
-                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surface, contentColor = MaterialTheme.colorScheme.tertiary),
+                        onClick = { isCustomCookbooksExpanded = !isCustomCookbooksExpanded },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.surface,
+                            contentColor = MaterialTheme.colorScheme.tertiary
+                        ),
                     ) {
-                        if(isCustomCookbooksExpanded) {
+                        if (isCustomCookbooksExpanded) {
                             Icon(
                                 imageVector = Icons.Filled.Clear,
                                 contentDescription = "Collapse",
@@ -451,8 +450,7 @@ fun TabletCookBookLayout(
                 ) {
                     IconButton(onClick = { onCookbookSelect(null) }) {
                         Icon(
-                            imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Back"
+                            imageVector = Icons.Default.ArrowBack, contentDescription = "Back"
                         )
                     }
                     Text(
@@ -467,7 +465,7 @@ fun TabletCookBookLayout(
                     navController = navController,
                     viewModel = viewModel
                 )
-            }else {
+            } else {
                 // Show all cookbooks in card format
                 Text(
                     text = "All Cookbooks",

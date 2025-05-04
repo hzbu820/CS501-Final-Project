@@ -1,7 +1,20 @@
 package com.cs501.pantrypal.screen
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -12,55 +25,75 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Remove
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.cs501.pantrypal.AppViewModelProvider
 import com.cs501.pantrypal.ui.theme.InfoColor
-import com.cs501.pantrypal.ui.theme.PrimaryLight
 import com.cs501.pantrypal.ui.theme.Typography
 import com.cs501.pantrypal.util.ShakeSensorManager
 import com.cs501.pantrypal.viewmodel.RecipeViewModel
 import kotlinx.coroutines.launch
 
-import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.unit.sp
-import androidx.compose.ui.graphics.Color
-
 @Composable
-fun RecipeSearchScreen(viewModel: RecipeViewModel, navController: NavController, snackbarHostState: SnackbarHostState) {
+fun RecipeSearchScreen(navController: NavController, snackbarHostState: SnackbarHostState) {
+    val viewModel = AppViewModelProvider.recipeViewModel
     val configuration = LocalConfiguration.current
     val isTablet = configuration.screenWidthDp >= 600
-    
+
     var ingredients by remember { mutableStateOf(listOf("")) }
     val maxIngredients = 5
     var showShakeInfo by remember { mutableStateOf(false) }
-    
+
     // Set up shake detection
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val shakeSensorManager = remember { ShakeSensorManager(context) }
 
 
-    
     // Register and unregister the sensor when the composable enters/leaves composition
     DisposableEffect(shakeSensorManager) {
         shakeSensorManager.setOnShakeListener {
             coroutineScope.launch {
                 viewModel.getRandomRecipes()
-                snackbarHostState.showSnackbar(message = "Shake detected! Finding recipes with your pantry ingredients...", duration = SnackbarDuration.Short)
+                snackbarHostState.showSnackbar(
+                    message = "Shake detected! Finding recipes with your pantry ingredients...",
+                    duration = SnackbarDuration.Short
+                )
             }
         }
         shakeSensorManager.register()
-        
+
         onDispose {
             shakeSensorManager.unregister()
         }
@@ -75,8 +108,7 @@ fun RecipeSearchScreen(viewModel: RecipeViewModel, navController: NavController,
             maxIngredients = maxIngredients,
             showShakeInfo = showShakeInfo,
             onShowShakeInfoChange = { showShakeInfo = it },
-            onIngredientsChange = { ingredients = it }
-        )
+            onIngredientsChange = { ingredients = it })
     } else {
         PhoneRecipeSearchLayout(
             viewModel = viewModel,
@@ -86,8 +118,7 @@ fun RecipeSearchScreen(viewModel: RecipeViewModel, navController: NavController,
             maxIngredients = maxIngredients,
             showShakeInfo = showShakeInfo,
             onShowShakeInfoChange = { showShakeInfo = it },
-            onIngredientsChange = { ingredients = it }
-        )
+            onIngredientsChange = { ingredients = it })
     }
 
     if (showShakeInfo) {
@@ -101,8 +132,7 @@ fun RecipeSearchScreen(viewModel: RecipeViewModel, navController: NavController,
                 TextButton(onClick = { showShakeInfo = false }) {
                     Text("Got it!")
                 }
-            }
-        )
+            })
     }
 }
 
@@ -118,7 +148,7 @@ fun TabletRecipeSearchLayout(
     onIngredientsChange: (List<String>) -> Unit
 ) {
     val coroutineScope = rememberCoroutineScope()
-    
+
     Row(modifier = Modifier.fillMaxSize()) {
         Card(
             modifier = Modifier
@@ -127,7 +157,7 @@ fun TabletRecipeSearchLayout(
                 .padding(16.dp),
             elevation = CardDefaults.cardElevation(4.dp),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-        ){
+        ) {
             Column(
                 modifier = Modifier
                     .fillMaxHeight()
@@ -161,8 +191,7 @@ fun TabletRecipeSearchLayout(
                         if (ingredients.size > 1) {
                             onIngredientsChange(ingredients.filterIndexed { i, _ -> i != index })
                         }
-                    }
-                )
+                    })
 
                 Spacer(modifier = Modifier.height(16.dp))
 
@@ -188,7 +217,10 @@ fun TabletRecipeSearchLayout(
                         onClick = { viewModel.getRandomRecipes() },
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text("Shake for Pantry Recipes", style = MaterialTheme.typography.labelLarge)
+                        Text(
+                            "Shake for Pantry Recipes",
+                            style = MaterialTheme.typography.labelLarge
+                        )
                     }
 
                     IconButton(
@@ -237,8 +269,7 @@ fun TabletRecipeSearchLayout(
                                     viewModel.selectedRecipe = recipe
                                     //viewModel.selectApiRecipe(recipe)
                                     navController.navigate("detail")
-                                }
-                        ) {
+                                }) {
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -286,18 +317,24 @@ fun TabletRecipeSearchLayout(
                                     Button(
                                         onClick = {
                                             coroutineScope.launch {
-                                                val exists = viewModel.isRecipeInCookbook(recipe.uri, "Default")
+                                                val exists = viewModel.isRecipeInCookbook(
+                                                    recipe.uri,
+                                                    "Default"
+                                                )
                                                 if (exists) {
                                                     snackbarHostState.showSnackbar("Already added to Default!")
                                                 } else {
-                                                    viewModel.saveRecipeToCookbook(recipe, "Default")
+                                                    viewModel.saveRecipeToCookbook(
+                                                        recipe,
+                                                        "Default"
+                                                    )
                                                     snackbarHostState.showSnackbar("Saved to Default!")
                                                 }
                                             }
                                         },
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .height(30.dp) ,// 控制竖向高度更窄
+                                            .height(30.dp),// 控制竖向高度更窄
                                         colors = ButtonDefaults.buttonColors(
                                             containerColor = MaterialTheme.colorScheme.primaryContainer, // 更浅的主题色
                                             contentColor = MaterialTheme.colorScheme.onPrimaryContainer   // 匹配的文字色
@@ -328,7 +365,7 @@ fun PhoneRecipeSearchLayout(
     onShowShakeInfoChange: (Boolean) -> Unit,
     onIngredientsChange: (List<String>) -> Unit
 ) {
-    val coroutineScope = rememberCoroutineScope()
+    rememberCoroutineScope()
 
 
     Column(modifier = Modifier.padding(16.dp)) {
@@ -337,7 +374,7 @@ fun PhoneRecipeSearchLayout(
 
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
-                "Enter ingredients (max $maxIngredients)", 
+                "Enter ingredients (max $maxIngredients)",
                 style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.weight(1f)
             )
@@ -346,7 +383,7 @@ fun PhoneRecipeSearchLayout(
         IngredientInputSection(
             ingredients = ingredients,
             maxIngredients = maxIngredients,
-            onIngredientChange = { index, value -> 
+            onIngredientChange = { index, value ->
                 onIngredientsChange(ingredients.toMutableList().apply {
                     this[index] = value
                 })
@@ -360,9 +397,8 @@ fun PhoneRecipeSearchLayout(
                 if (ingredients.size > 1) {
                     onIngredientsChange(ingredients.filterIndexed { i, _ -> i != index })
                 }
-            }
-        )
-        
+            })
+
         Spacer(modifier = Modifier.height(16.dp))
 
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -372,9 +408,7 @@ fun PhoneRecipeSearchLayout(
                     if (nonEmptyIngredients.isNotEmpty()) {
                         viewModel.searchRecipes(nonEmptyIngredients.joinToString(", "))
                     }
-                },
-                modifier = Modifier.weight(1f),
-                colors = ButtonDefaults.buttonColors(InfoColor,)
+                }, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors(InfoColor)
             ) {
                 Text("Search")
             }
@@ -404,7 +438,12 @@ fun PhoneRecipeSearchLayout(
         }
 
         if (viewModel.isLoading) {
-            Box(modifier = Modifier.fillMaxWidth().padding(top = 16.dp), contentAlignment = Alignment.Center) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 16.dp),
+                contentAlignment = Alignment.Center
+            ) {
                 CircularProgressIndicator()
             }
         } else {
@@ -422,8 +461,7 @@ fun PhoneRecipeSearchLayout(
                             .clickable {
                                 viewModel.selectedRecipe = recipe
                                 navController.navigate("detail")
-                            }
-                    ) {
+                            }) {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -471,7 +509,8 @@ fun PhoneRecipeSearchLayout(
                                 Button(
                                     onClick = {
                                         coroutineScope.launch {
-                                            val exists = viewModel.isRecipeInCookbook(recipe.uri, "Default")
+                                            val exists =
+                                                viewModel.isRecipeInCookbook(recipe.uri, "Default")
                                             if (exists) {
                                                 snackbarHostState.showSnackbar("Already added to Default!")
                                             } else {
@@ -480,8 +519,7 @@ fun PhoneRecipeSearchLayout(
                                             }
                                         }
                                     },
-                                    modifier = Modifier
-                                        .fillMaxWidth(),
+                                    modifier = Modifier.fillMaxWidth(),
                                     colors = ButtonDefaults.buttonColors(
                                         containerColor = MaterialTheme.colorScheme.primaryContainer, // 更浅的主题色
                                         contentColor = MaterialTheme.colorScheme.onPrimaryContainer   // 匹配的文字色
@@ -511,7 +549,10 @@ fun IngredientInputSection(
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
         ingredients.forEachIndexed { index, ingredient ->
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 4.dp)) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(vertical = 4.dp)
+            ) {
                 OutlinedTextField(
                     value = ingredient,
                     onValueChange = { onIngredientChange(index, it) },
@@ -537,7 +578,7 @@ fun IngredientInputSection(
 
             }
         }
-        
+
         if (ingredients.size < maxIngredients) {
             TextButton(
                 onClick = onAddIngredient,

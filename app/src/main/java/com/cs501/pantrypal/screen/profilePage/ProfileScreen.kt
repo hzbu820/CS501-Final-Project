@@ -33,6 +33,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.cs501.pantrypal.AppViewModelProvider
 import com.cs501.pantrypal.R
 import com.cs501.pantrypal.data.database.SavedRecipe
 import com.cs501.pantrypal.data.database.UserIngredients
@@ -53,12 +54,14 @@ import kotlinx.coroutines.launch
 @SuppressLint("SimpleDateFormat")
 @Composable
 fun ProfileScreen(
-    userViewModel: UserViewModel,
     navController: NavController,
     snackbarHostState: SnackbarHostState,
-    userIngredientsViewModel: UserIngredientsViewModel,
-    recipesViewModel: RecipeViewModel
 ) {
+    val userViewModel: UserViewModel = AppViewModelProvider.userViewModel
+    val userIngredientsViewModel: UserIngredientsViewModel =
+        AppViewModelProvider.userIngredientsViewModel
+    val recipesViewModel: RecipeViewModel = AppViewModelProvider.recipeViewModel
+
     val currentUser by userViewModel.currentUser.collectAsState()
     val ingredients by userIngredientsViewModel.allIngredients.collectAsState()
     val coroutineScope = rememberCoroutineScope()

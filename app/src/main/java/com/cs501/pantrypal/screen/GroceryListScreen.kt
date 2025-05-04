@@ -31,6 +31,7 @@ import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.ShoppingCart
 import androidx.compose.material3.AlertDialog
@@ -75,8 +76,10 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.cs501.pantrypal.AppViewModelProvider
 import com.cs501.pantrypal.R
 import com.cs501.pantrypal.data.database.GroceryItem
+import com.cs501.pantrypal.data.database.UserIngredients
 import com.cs501.pantrypal.ui.theme.ErrorColor
 import com.cs501.pantrypal.ui.theme.InfoColor
 import com.cs501.pantrypal.ui.theme.TextSecondary
@@ -90,8 +93,9 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GroceryListScreen(
-    groceryViewModel: GroceryViewModel, snackbarHostState: SnackbarHostState
+    snackbarHostState: SnackbarHostState
 ) {
+    val groceryViewModel: GroceryViewModel = AppViewModelProvider.groceryViewModel
     val allGroceryItems by groceryViewModel.allGroceryItems.collectAsState()
     val showCheckedItems by groceryViewModel.showCheckedItems.collectAsState()
     val searchQuery by groceryViewModel.searchQuery.collectAsState()
@@ -680,16 +684,44 @@ fun GroceryItemCard(
                 }
             }
 
-            // Delete button
-            IconButton(onClick = { onDeleteItem(groceryItem) }) {
-                Icon(
-                    imageVector = Icons.Outlined.Delete,
-                    contentDescription = "Delete item",
-                    tint = MaterialTheme.colorScheme.error
-                )
+            if (groceryItem.isChecked) {
+                IconButton(onClick = { addToPantry(groceryItem) }) {
+                    Icon(
+                        imageVector = Icons.Outlined.Add,
+                        contentDescription = "Add item",
+                        tint = InfoColor
+                    )
+                }
+            } else {
+                IconButton(onClick = { onDeleteItem(groceryItem) }) {
+                    Icon(
+                        imageVector = Icons.Outlined.Delete,
+                        contentDescription = "Delete item",
+                        tint = MaterialTheme.colorScheme.error
+                    )
+                }
             }
         }
     }
+}
+
+fun ingredientFormatter(groceryItem: GroceryItem): UserIngredients {
+    return UserIngredients(
+        name = groceryItem.name,
+        foodCategory = groceryItem.category,
+        quantity = groceryItem.quantity,
+        unit = groceryItem.unit,
+        expirationDate = "",
+        userId = groceryItem.userId
+    )
+}
+
+fun addToPantry(groceryItem: GroceryItem) {
+    val userIngredient = ingredientFormatter(groceryItem)
+    val userIngredientsViewModel = AppViewModelProvider.userIngredientsViewModel
+    val groceryViewModel = AppViewModelProvider.groceryViewModel
+    userIngredientsViewModel.addIngredient(userIngredient)
+    groceryViewModel.deleteGroceryItem(groceryItem)
 }
 
 @Composable
