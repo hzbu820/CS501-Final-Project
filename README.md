@@ -1,70 +1,107 @@
-# CS501-Final-Project
+# CS 501 Final Project: Pantry Pal - Smart Recipe Discovery
 
-# Proposal：Pantry Pal-Smart Recipe Discovery App
+## Objective (CS 501 - Spring 2025)
 
-## 1. Project Overview 
+This project fulfills the requirements for CS 501 - Mobile Application Development. The primary goal is to develop a feature-rich, user-friendly Android application that integrates modern mobile development principles, focusing on creating an engaging, polished, and delightful app that serves as an impressive portfolio piece.
+
+## Overview: Pantry Pal
+
 Pantry Pal is a user-centric recipe discovery app designed to minimize food waste and simplify meal planning by leveraging ingredients users already have. Targeting cooking enthusiasts and beginners alike, the app combines practicality with playful interaction, empowering users to cook creatively while reducing unnecessary grocery purchases.
 
-## 2. Targets and Users
-- **Target Users:**  
-  - Cook beginner and enthusiasts who wants to learn cooking or new dishs 
-  - Environmentalists who want to reduce food waste
+## Target Users & Goals
 
-- **Project Goal:**  
-  - Provides personalized recipe recommendations using available ingredients 
-  - Enhances fun and interactivity through the "shake-shake" function   
-  - Provides convenient recipe storage and offline access 
-  - Helps users manage kitchen inventory and shopping lists to improve meal planning efficiency
+*   **Target Users:**
+    *   Cooking beginners and enthusiasts seeking new dishes or ways to use existing ingredients.
+    *   Environmentally conscious individuals aiming to reduce food waste.
+*   **Project Goals:**
+    *   Provide personalized recipe recommendations based on available ingredients.
+    *   Enhance user engagement through interactive features like the "shake-shake" function.
+    *   Offer convenient recipe storage and offline access.
+    *   Help users manage kitchen inventory and create shopping lists, improving meal planning efficiency.
 
-## 3. Core Features   
-1. **Ingredient-Based Recipe Search**  
-   Users can input or select ingredients (e.g., "chicken, tomato") to discover tailored recipes, encouraging cooking with what’s on hand rather than purchasing extra groceries.
+## Core Features (Aligned with CS 501 Requirements)
 
-2. **“Shake for Surprise” (Fun Sensor Integration)**  
-   A playful feature where users shake their phone to receive a random recipe suggestion, powered by the accelerometer, making meal planning interactive and fun.
+1.  **Local Database for Data Persistence:**
+    *   **Functionality:** Stores saved favorite recipes (Personal Cookbook) and user's pantry inventory locally.
+    *   **Operations:** Supports CRUD (Create, Read, Update, Delete) operations for managing recipes and pantry items.
+    *   **Benefit:** Enables offline access and quick retrieval of user data.
 
-3. **Personal Cookbook (Local Save)**  
-   Save favorite recipes locally for offline access, turning Pantry Pal into a convenient digital recipe book available anytime.
+2.  **External API Integration:**
+    *   **API Used:** [Edamam Recipe API](https://developer.edamam.com/edamam-recipe-api)
+    *   **Functionality:** Fetches recipes based on user-inputted ingredients.
+    *   **Benefit:** Provides a vast library of recipes tailored to the user's available items.
 
-4. **Pantry & Grocery Helper**  
-   Track pantry items within the app and, when viewing recipes, see what’s missing—adding needed ingredients to a grocery list for efficient shopping.
+3.  **Onboard Sensor Integration:**
+    *   **Accelerometer:** Powers the "Shake for Surprise" feature, offering a random recipe suggestion when the user shakes their phone, adding an element of fun.
+    *   **Microphone:** Enables voice input for searching recipes or ingredients hands-free.
+    *   **(Potential Feature) Camera:** Scan ingredients using the camera to automatically update the pantry inventory via text recognition (OCR).
 
-5. **Clean UI & Accessibility**  
-   A simple, readable interface with proper contrast, dark mode, voice input search, and screen reader support ensures a delightful experience for all users.
+4.  **Multi-Device Support & Optimization:**
+    *   **Tested Devices:** Designed and tested for compatibility on both standard Android smartphones and tablets.
+    *   **Responsive UI:** Utilizes Jetpack Compose's responsive design principles to adapt the layout dynamically. Phones display a compact view, while tablets offer an expanded multi-pane UI for enhanced usability.
 
-6. **Potential Feature: AI recognition to update inventory**  
-   Call up the device camera and update the food pantry in the app by taking photos of existing ingredients, which the AI then recognizes as text.
+5.  **Clean, Usable, and Delightful UI/UX (with Accessibility):**
+    *   **UI Toolkit:** Built entirely with Jetpack Compose.
+    *   **Design:** Follows Material Design guidelines for consistency, providing smooth interactions, fluid animations (e.g., screen transitions), and intuitive navigation.
+    *   **Accessibility:** Adheres to accessibility best practices, including:
+        *   Support for screen readers.
+        *   Adequate color contrast and readable typography.
+        *   Text scaling compatibility.
+        *   Dark mode support.
+        *   Alternative input methods (voice search).
 
-## 4. Technical Approach 
-- **Database:**  
-  - A local database stores saved recipes and pantry lists, enabling offline access and quick retrieval for the Personal Cookbook and Pantry & Grocery Helper features.
+## Technology Stack
 
-- **API：**  
-  - Integrates with the Edamam Recipe API [Edamam Recipe API](https://developer.edamam.com/edamam-recipe-api)to fetch recipes based on user-entered ingredients.
+*   **Language:** Kotlin
+*   **UI Toolkit:** Jetpack Compose
+*   **Architecture:** (Specify your architecture, e.g., MVVM, MVI)
+*   **Asynchronous Programming:** Kotlin Coroutines
+*   **Database:** (Specify: Room, Firebase Realtime/Firestore, DataStore)
+*   **Networking:** Retrofit / OkHttp (for Edamam API)
+*   **Dependency Injection:** (Specify if used, e.g., Hilt, Koin)
+*   **Design:** Material Design 3
 
-- **Sensors:**  
-  - **Accelerometer:** Detects phone shakes to trigger the "Shake for Surprise" feature.
-  - **Microphone:** Supports voice input for hands-free recipe or ingredient searches.
+## Setup and Installation
 
-## 5. Testing Strategy
-- **Target Devices:**  
-  - Pantry Pal is designed for multi-device compatibility, supporting both phones and tablets. The responsive UI adapts seamlessly, offering a compact layout on phones and an expanded dashboard on tablets for an optimal user experience across screen sizes.
+1.  Clone the repository: `git clone https://github.com/your-username/CS501-Final-Project.git`
+2.  Open the project in Android Studio (latest stable version recommended).
+3.  Ensure you have the necessary Android SDK platforms installed.
+4.  **(Add specific setup steps, e.g., API keys)** If the Edamam API requires an API key, create a `local.properties` file in the project root and add your key:
+    ```properties
+    EDAMAM_APP_ID="YOUR_APP_ID"
+    EDAMAM_APP_KEY="YOUR_APP_KEY"
+    ```
+5.  Build the project: `Build > Make Project` or use the Gradle build button.
+6.  Run the app on an emulator or physical device: `Run > Run 'app'`.
 
-## 6. Expected Outcomes  
-- **Reduced Food Waste:**  
-  -  Users utilize pantry staples efficiently, cutting unnecessary purchases.
+## Usage
 
-- **Enhanced User Experience:**  
-  - Engaging features (e.g., shake-to-discover) and intuitive design drive retention.
+*(Provide brief instructions or a walkthrough on how to use the main features of the app)*
 
+1.  Launch Pantry Pal.
+2.  Navigate to the 'Pantry' tab to add ingredients you have.
+3.  Go to the 'Search' tab and input ingredients or use the 'Shake for Surprise' feature.
+4.  Browse the suggested recipes.
+5.  View recipe details and save favorites to your 'Cookbook'.
+6.  Use the 'Grocery List' feature generated from missing ingredients in recipes.
 
-## 8. Initial Sketches
-  - Recipe Search and Detail Page:
-  ![Recipe_page](images/recipe_search-detail.jpg)
+## Project Milestones (CS 501 Structure)
 
-  - Cook Books and Grocery List Page:
-  ![cook_book](images/cook_book-grocery_list.jpg)
+This project followed an agile development approach with iterative sprints:
 
-  - User Profile Page:
-  ![User_Profile](images/profile.jpg)
+*   **Proposal:** Initial concept, tech stack selection, wireframes.
+*   **Sprint 1:** Database implementation, initial UI setup, basic data persistence.
+*   **Sprint 2:** External API integration, multi-device UI adaptation.
+*   **Sprint 3:** Sensor integration, final UI polishing, beta testing.
+*   **Final Submission:** Fully functional app, presentation, final report.
+
+## Initial Sketches
+
+*   Recipe Search and Detail Page:
+    ![Recipe_page](images/recipe_search-detail.jpg)
+*   Cook Books and Grocery List Page:
+    ![cook_book](images/cook_book-grocery_list.jpg)
+*   User Profile Page:
+    ![User_Profile](images/profile.jpg)
+
 
