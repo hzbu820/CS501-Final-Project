@@ -47,6 +47,19 @@ abstract class BaseViewModel(application: Application) : AndroidViewModel(applic
 
     open fun onUserIdChanged(userId: String) {}
 
+    fun logout(){
+        viewModelScope.launch {
+            val dataStore = getApplication<Application>().userDataStore
+            dataStore.edit { prefs ->
+                prefs[stringPreferencesKey("user_id")] = ""
+            }
+            _currentUserId.value = ""
+        }
+        onLogout();
+    }
+
+    abstract fun onLogout();
+
     /**
      * Get the current user ID
      */
@@ -61,18 +74,6 @@ abstract class BaseViewModel(application: Application) : AndroidViewModel(applic
         return _currentUserId.value != ""
     }
 
-    /**
-     * Clear the current user ID
-     */
-    fun clearUserId() {
-        viewModelScope.launch {
-            val dataStore = getApplication<Application>().userDataStore
-            dataStore.edit { prefs ->
-                prefs[stringPreferencesKey("user_id")] = ""
-            }
-            _currentUserId.value = ""
-        }
-    }
 
     /**
      * Set the current user ID

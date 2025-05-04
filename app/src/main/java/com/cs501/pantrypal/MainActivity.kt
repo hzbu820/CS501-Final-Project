@@ -15,6 +15,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -79,7 +80,7 @@ fun AppNavHost() {
                 RecipeSearchScreen(navController, snackbarHostState)
             }
             composable("cookbook") {
-                CookBookScreen(navController)
+                CookBookScreen(navController, snackbarHostState)
             }
             composable("groceryList") {
                 GroceryListScreen(snackbarHostState)

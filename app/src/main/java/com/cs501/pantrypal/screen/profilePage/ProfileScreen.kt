@@ -105,6 +105,9 @@ fun ProfileScreen(
 
             ProfileTopBar {
                 userViewModel.logout()
+                userIngredientsViewModel.logout()
+                recipesViewModel.logout()
+                AppViewModelProvider.groceryViewModel.logout()
                 coroutineScope.launch {
                     snackbarHostState.showSnackbar(
                         "Logout successful",

@@ -239,14 +239,13 @@ class RecipeViewModel(application: Application) : BaseViewModel(application) {
         return repository.isRecipeInCookbook(url, cookbookName)
     }
 
-    fun createCookbook(name: String) {
-        viewModelScope.launch {
-            val userId = getCurrentUserId()
-            if (userId == "") {
-                Log.w("PantryPal", "Cannot create cookbook: No user logged in")
-                return@launch
-            }
+    fun createCookbook(name: String): Boolean {
+        if (!isUserLoggedIn()) {
+            Log.w("PantryPal", "Cannot create cookbook: No user logged in")
+            return false
+        }
 
+        viewModelScope.launch {
             // placeholder
             //TODO: Actually input label image and url
             val placeholder = SavedRecipe(
@@ -256,13 +255,15 @@ class RecipeViewModel(application: Application) : BaseViewModel(application) {
                 ingredientLines = listOf(),
                 calories = 0.0,
                 isFavorite = false,
-                userId = userId,
+                userId = getCurrentUserId(),
                 cookbookName = name
             )
 
             repository.insertRecipe(placeholder)
             loadCookbooks()
         }
+
+        return true
     }
 
     fun getRecipeCountInCookbook(cookbook: String): Int {
@@ -285,20 +286,20 @@ class RecipeViewModel(application: Application) : BaseViewModel(application) {
         return savedRecipeUrls.value.contains(recipe.uri ?: "")
     }
 
-    fun saveRecipeToCookbook(recipe: Recipe, cookbookName: String = "Default", isFavorite: Boolean = false) {
+    fun saveRecipeToCookbook(recipe: Recipe, cookbookName: String = "Default", isFavorite: Boolean = false): Boolean {
         if (!isUserLoggedIn()) {
             Log.w("PantryPal", "Cannot save recipe: No user logged in")
-            return
+            return false
         }
 
         viewModelScope.launch {
-
             val savedRecipe = recipe.toSavedRecipe(getCurrentUserId(), isFavorite, cookbookName)
             repository.insertRecipe(savedRecipe)
             repository.deletePlaceholderRecipesFromCookbook(cookbookName)
             loadRecipesByCookbook(cookbookName)
             //loadSavedRecipes()
         }
+        return true
     }
 
     fun deleteRecipeByUrl(url: String) {
@@ -352,6 +353,14 @@ class RecipeViewModel(application: Application) : BaseViewModel(application) {
 
     fun getAllSavedRecipes(): List<SavedRecipe> {
         return _savedRecipes.value
+    }
+
+    override fun onLogout() {
+        _savedRecipes.value = emptyList()
+        _cookbooks.value = emptyList()
+        _cookbookRecipeCounts.value = emptyMap()
+        _pantryIngredients.value = emptyList()
+
     }
 
 }

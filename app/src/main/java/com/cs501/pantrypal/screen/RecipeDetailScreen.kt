@@ -98,8 +98,12 @@ fun RecipeDetailScreen(navController: NavController) {
                         if (exists) {
                             snackbarHostState.showSnackbar("Already exists in \"$cookbookName\"!")
                         } else {
-                            viewModel.saveRecipeToCookbook(recipe, cookbookName)
-                            snackbarHostState.showSnackbar("Added to $cookbookName!")
+                            val success = viewModel.saveRecipeToCookbook(recipe, cookbookName)
+                            if (!success) {
+                                snackbarHostState.showSnackbar("You have not logged in yet!")
+                            }else{
+                                snackbarHostState.showSnackbar("Added to $cookbookName!")
+                            }
                         }
                     }
                 })

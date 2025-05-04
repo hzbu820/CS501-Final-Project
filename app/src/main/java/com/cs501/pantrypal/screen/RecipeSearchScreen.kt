@@ -1,5 +1,6 @@
 package com.cs501.pantrypal.screen
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -136,6 +137,7 @@ fun RecipeSearchScreen(navController: NavController, snackbarHostState: Snackbar
     }
 }
 
+@SuppressLint("DefaultLocale")
 @Composable
 fun TabletRecipeSearchLayout(
     viewModel: RecipeViewModel,
@@ -324,11 +326,13 @@ fun TabletRecipeSearchLayout(
                                                 if (exists) {
                                                     snackbarHostState.showSnackbar("Already added to Default!")
                                                 } else {
-                                                    viewModel.saveRecipeToCookbook(
+
+                                                    val success = viewModel.saveRecipeToCookbook(
                                                         recipe,
                                                         "Default"
                                                     )
-                                                    snackbarHostState.showSnackbar("Saved to Default!")
+                                                    if (!success) snackbarHostState.showSnackbar("You have not logged in yet!")
+                                                    else snackbarHostState.showSnackbar("Saved to Default!")
                                                 }
                                             }
                                         },
@@ -514,8 +518,9 @@ fun PhoneRecipeSearchLayout(
                                             if (exists) {
                                                 snackbarHostState.showSnackbar("Already added to Default!")
                                             } else {
-                                                viewModel.saveRecipeToCookbook(recipe, "Default")
-                                                snackbarHostState.showSnackbar("Saved to Default!")
+                                                val success =viewModel.saveRecipeToCookbook(recipe, "Default")
+                                                if (!success) snackbarHostState.showSnackbar("You have not logged in yet!")
+                                                else snackbarHostState.showSnackbar("Saved to Default!")
                                             }
                                         }
                                     },

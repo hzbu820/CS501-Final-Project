@@ -35,6 +35,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldDefaults
@@ -44,6 +45,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -63,10 +65,12 @@ import com.cs501.pantrypal.ui.theme.TextTertiary
 import com.cs501.pantrypal.ui.theme.Typography
 import com.cs501.pantrypal.util.Constants.COOKBOOK_CATEGORIES
 import com.cs501.pantrypal.viewmodel.RecipeViewModel
+import kotlinx.coroutines.launch
 
 @Composable
 fun CookBookScreen(
-    navController: NavController
+    navController: NavController,
+    snackbarHostState: SnackbarHostState,
 ) {
     val viewModel: RecipeViewModel = AppViewModelProvider.recipeViewModel
     val cookbooks by viewModel.cookbooks.collectAsState()
@@ -76,7 +80,8 @@ fun CookBookScreen(
     var searchQuery by remember { mutableStateOf("") }
     var selectedCookbook by remember { mutableStateOf<String?>(null) }
     var isLoading by remember { mutableStateOf(false) }
-
+    val coroutineScope = rememberCoroutineScope()
+    var showError by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
         isLoading = true
         viewModel.loadCookbooks()
@@ -142,18 +147,34 @@ fun CookBookScreen(
     if (showDialog) {
         AddCookBookDialog(
             newCookbookName = newCookbookName,
-            onNameChange = { newCookbookName = it },
+            onNameChange = { newCookbookName = it ; showError = false },
             onDismiss = {
                 newCookbookName = ""
+                showError = false
                 showDialog = false
             },
             onConfirm = {
                 if (newCookbookName.isNotBlank()) {
-                    viewModel.createCookbook(newCookbookName.trim())
-                    newCookbookName = ""
-                    showDialog = false
+                    val success = viewModel.createCookbook(newCookbookName.trim())
+                    if (success) {
+                        viewModel.loadCookbooks()
+                        newCookbookName = ""
+                        showDialog = false
+                        coroutineScope.launch {
+                            snackbarHostState.showSnackbar("Cookbook '$newCookbookName' created successfully")
+                        }
+                    } else {
+                        showDialog = false
+                        coroutineScope.launch {
+                            snackbarHostState.showSnackbar("You must Login to create a cookbook")
+                        }
+                    }
+                }else{
+                    showError = true
                 }
-            })
+            },
+            showError = showError
+            )
     }
 }
 
@@ -562,13 +583,19 @@ fun AddCookBookDialog(
     newCookbookName: String,
     onNameChange: (String) -> Unit,
     onDismiss: () -> Unit,
-    onConfirm: () -> Unit
+    onConfirm: () -> Unit,
+    showError: Boolean
 ) {
     AlertDialog(onDismissRequest = onDismiss, title = { Text("New Cookbook") }, text = {
         OutlinedTextField(
             value = newCookbookName,
             onValueChange = onNameChange,
-            label = { Text("Cookbook name") })
+            label = { Text("Cookbook name") },
+            supportingText = {
+                if(showError) {
+                    Text("Cookbook name cannot be empty", color = ErrorColor)
+                }
+            })
     }, confirmButton = {
         TextButton(onClick = onConfirm) {
             Text("Create")

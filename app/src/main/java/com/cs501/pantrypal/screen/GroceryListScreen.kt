@@ -272,7 +272,7 @@ fun TabletGroceryLayout(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 16.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = ErrorColor)
+                    colors = ButtonDefaults.buttonColors(containerColor = ErrorColor, contentColor = Color.White)
                 ) {
                     Icon(
                         imageVector = Icons.Outlined.Delete,

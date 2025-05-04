@@ -152,4 +152,11 @@ class GroceryViewModel(application: Application) : BaseViewModel(application) {
             getAllGroceryItems()
         }
     }
+
+    override fun onLogout() {
+        _allGroceryItems.value = emptyList()
+        _searchQuery.value = ""
+        _showCheckedItems.value = true
+        _categoryFilter.value = null
+    }
 }

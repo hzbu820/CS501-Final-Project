@@ -128,8 +128,7 @@ class UserViewModel(application: Application) : BaseViewModel(application) {
     /**
      * Logout function
      */
-    fun logout() {
-        clearUserId()
+    override fun onLogout() {
         _currentUser.value = null
     }
 
@@ -151,8 +150,7 @@ class UserViewModel(application: Application) : BaseViewModel(application) {
     fun deleteUserAccount(user: User): Boolean {
         viewModelScope.launch {
             repository.deleteUser(user)
-            clearUserId()
-            _currentUser.value = null
+            logout()
         }
         return true
     }

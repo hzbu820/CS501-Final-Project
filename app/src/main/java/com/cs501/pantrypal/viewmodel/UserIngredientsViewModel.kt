@@ -108,4 +108,9 @@ class UserIngredientsViewModel(application: Application) : BaseViewModel(applica
             getAllIngredients()
         }
     }
+    override fun onLogout() {
+        _allIngredients.value = emptyList()
+        _ingredients.value = emptyList()
+        setEmptyBarcodeIngredient()
+    }
 }
