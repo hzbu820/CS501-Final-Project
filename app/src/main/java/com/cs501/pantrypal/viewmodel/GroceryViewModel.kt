@@ -198,10 +198,12 @@ class GroceryViewModel(application: Application) : BaseViewModel(application) {
     
     /**
      * Search for grocery items by name
+     * Now triggered by a button click rather than on every character
      */
     fun searchGroceryItems(query: String) {
         _searchQuery.value = query
         loadItems()
+        Log.d("GroceryViewModel", "Performing search with query: '$query'")
     }
     
     /**

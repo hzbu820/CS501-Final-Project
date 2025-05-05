@@ -105,7 +105,6 @@ fun GroceryListScreen(
     // UI state
     var showAddItemDialog by remember { mutableStateOf(false) }
     var showFilterOptions by remember { mutableStateOf(false) }
-    var tempSearchQuery by remember { mutableStateOf(searchQuery) }
 
     // Check if device is a tablet based on screen width
     val configuration = LocalConfiguration.current
@@ -116,14 +115,13 @@ fun GroceryListScreen(
         TabletGroceryLayout(
             allGroceryItems = allGroceryItems,
             showCheckedItems = showCheckedItems,
-            searchQuery = tempSearchQuery,
+            searchQuery = searchQuery,
             categoryFilter = categoryFilter,
             onSearchQueryChange = { query ->
-                tempSearchQuery = query
+                // Now only perform search when explicitly requested via button click
                 groceryViewModel.searchGroceryItems(query)
             },
             onClearSearch = {
-                tempSearchQuery = ""
                 groceryViewModel.searchGroceryItems("")
             },
             onToggleShowCheckedItems = { groceryViewModel.toggleShowCheckedItems() },
@@ -143,14 +141,13 @@ fun GroceryListScreen(
         PhoneGroceryLayout(
             allGroceryItems = allGroceryItems,
             showCheckedItems = showCheckedItems,
-            searchQuery = tempSearchQuery,
+            searchQuery = searchQuery,
             showFilterOptions = showFilterOptions,
             onSearchQueryChange = { query ->
-                tempSearchQuery = query
+                // Now only perform search when explicitly requested via button click
                 groceryViewModel.searchGroceryItems(query)
             },
             onClearSearch = {
-                tempSearchQuery = ""
                 groceryViewModel.searchGroceryItems("")
             },
             onToggleFilterOptions = { showFilterOptions = !showFilterOptions },
@@ -217,37 +214,11 @@ fun TabletGroceryLayout(
                     modifier = Modifier.padding(bottom = 16.dp)
                 )
 
-                // Search bar
-                OutlinedTextField(
-                    value = searchQuery,
-                    onValueChange = onSearchQueryChange,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 16.dp),
-                    placeholder = { Text("Search") },
-                    leadingIcon = {
-                        Icon(
-                            imageVector = Icons.Default.Search, contentDescription = "Search"
-                        )
-                    },
-                    trailingIcon = {
-                        if (searchQuery.isNotEmpty()) {
-                            IconButton(onClick = onClearSearch) {
-                                Icon(
-                                    imageVector = Icons.Default.Clear,
-                                    contentDescription = "Clear search"
-                                )
-                            }
-                        }
-                    },
-                    singleLine = true,
-                    shape = RoundedCornerShape(12.dp),
-                    colors = TextFieldDefaults.colors(
-                        focusedContainerColor = MaterialTheme.colorScheme.surface,
-                        unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-                        cursorColor = MaterialTheme.colorScheme.primary,
-                        focusedIndicatorColor = MaterialTheme.colorScheme.primary
-                    )
+                // Search bar with button
+                SearchBar(
+                    searchQuery = searchQuery,
+                    onSearchQueryChange = onSearchQueryChange,
+                    onClearSearch = onClearSearch
                 )
 
                 // Filter options
@@ -455,7 +426,7 @@ fun PhoneGroceryLayout(
             }
         }
 
-        // Search and Filter Bar
+        // Search Bar with button (modified)
         SearchBar(
             searchQuery = searchQuery,
             onSearchQueryChange = onSearchQueryChange,
@@ -481,7 +452,7 @@ fun PhoneGroceryLayout(
         ) {
             // Grocery List
             if (allGroceryItems.isEmpty()) {
-                EmptyGroceryList(onAddItem = onShowAddItemDialog)
+                EmptyGroceryList(onShowAddItemDialog)
             } else {
                 GroceryItemsList(
                     groceryItems = allGroceryItems,
@@ -509,49 +480,74 @@ fun PhoneGroceryLayout(
     }
 }
 
-
 @Composable
 fun SearchBar(
     searchQuery: String, onSearchQueryChange: (String) -> Unit, onClearSearch: () -> Unit
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusRequester = remember { FocusRequester() }
-
-    OutlinedTextField(
-        value = searchQuery,
-        onValueChange = onSearchQueryChange,
+    var tempQuery by remember { mutableStateOf(searchQuery) }
+    
+    Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(bottom = 16.dp)
-            .focusRequester(focusRequester),
-        placeholder = { Text("Search") },
-        leadingIcon = {
-            Icon(
-                imageVector = Icons.Default.Search, contentDescription = "Search"
-            )
-        },
-        trailingIcon = {
-            if (searchQuery.isNotEmpty()) {
-                IconButton(onClick = onClearSearch) {
-                    Icon(
-                        imageVector = Icons.Default.Clear, contentDescription = "Clear search"
-                    )
+            .padding(bottom = 16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        OutlinedTextField(
+            value = tempQuery,
+            onValueChange = { tempQuery = it },
+            modifier = Modifier
+                .weight(1f)
+                .focusRequester(focusRequester),
+            placeholder = { Text("Search") },
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Default.Search, contentDescription = "Search"
+                )
+            },
+            trailingIcon = {
+                if (tempQuery.isNotEmpty()) {
+                    IconButton(onClick = { 
+                        tempQuery = ""
+                        onClearSearch() 
+                    }) {
+                        Icon(
+                            imageVector = Icons.Default.Clear, contentDescription = "Clear search"
+                        )
+                    }
                 }
-            }
-        },
-        singleLine = true,
-        shape = RoundedCornerShape(12.dp),
-        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-        keyboardActions = KeyboardActions(onSearch = {
-            keyboardController?.hide()
-        }),
-        colors = TextFieldDefaults.colors(
-            focusedContainerColor = MaterialTheme.colorScheme.surface,
-            unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-            cursorColor = MaterialTheme.colorScheme.primary,
-            focusedIndicatorColor = MaterialTheme.colorScheme.primary
+            },
+            singleLine = true,
+            shape = RoundedCornerShape(12.dp),
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+            keyboardActions = KeyboardActions(onSearch = {
+                onSearchQueryChange(tempQuery)
+                keyboardController?.hide()
+            }),
+            colors = TextFieldDefaults.colors(
+                focusedContainerColor = MaterialTheme.colorScheme.surface,
+                unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                cursorColor = MaterialTheme.colorScheme.primary,
+                focusedIndicatorColor = MaterialTheme.colorScheme.primary
+            )
         )
-    )
+        
+        // Search button
+        IconButton(
+            onClick = { 
+                onSearchQueryChange(tempQuery)
+                keyboardController?.hide()
+            },
+            modifier = Modifier.padding(start = 8.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Default.Search,
+                contentDescription = "Execute search",
+                tint = InfoColor
+            )
+        }
+    }
 }
 
 @Composable
