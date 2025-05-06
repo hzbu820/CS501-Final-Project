@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -6,9 +8,19 @@ plugins {
     id("com.google.gms.google-services")
 }
 
+val propertiesFile = rootProject.file("local.properties")
+val localProperties = Properties()
+if(propertiesFile.exists()) {
+    localProperties.load(propertiesFile.inputStream())
+}
+
 android {
     namespace = "com.cs501.pantrypal"
     compileSdk = 35
+
+    buildFeatures {
+        buildConfig = true
+    }
 
     defaultConfig {
         applicationId = "com.cs501.pantrypal"
@@ -18,6 +30,10 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        buildConfigField("String", "FATSECRET_KEY", "\"${localProperties.getProperty("FATSECRET_KEY")}\"")
+        buildConfigField("String", "FATSECRET_SECRET", "\"${localProperties.getProperty("FATSECRET_SECRET")}\"")
+        buildConfigField("String", "EDAMAM_APP_ID", "\"${localProperties.getProperty("EDAMAM_APP_ID")}\"")
+        buildConfigField("String", "EDAMAM_APP_KEY", "\"${localProperties.getProperty("EDAMAM_APP_KEY")}\"")
     }
 
     buildTypes {

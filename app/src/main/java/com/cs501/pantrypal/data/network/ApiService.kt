@@ -1,6 +1,7 @@
 package com.cs501.pantrypal.data.network
 
 
+import com.cs501.pantrypal.BuildConfig
 import com.cs501.pantrypal.data.model.FoodIdResponse
 import com.cs501.pantrypal.data.model.FoodResponse
 import com.cs501.pantrypal.data.model.RecipeResponse
@@ -10,15 +11,18 @@ import retrofit2.http.POST
 import retrofit2.http.Query
 
 
+const val edamamId = BuildConfig.EDAMAM_APP_ID
+const val edamamKey = BuildConfig.EDAMAM_APP_KEY
 
 interface ApiService {
     @GET("api/recipes/v2")
     suspend fun searchRecipes(
         @Query("type") type: String = "public",
         @Query("q") ingredients: String,
-        @Query("app_id") appId: String = "eeddeecf",
-        @Query("app_key") appKey: String = "76309a24fdc778fc691885ccb9d2d300",
-        @Header("Edamam-Account-User") user: String = "sertarin"
+        @Query("app_id") appId: String = edamamId,
+        @Query("app_key") appKey: String = edamamKey,
+        @Query("random") random: Boolean = true,
+        @Header("Edamam-Account-User") user: String = "random"
     ): RecipeResponse
 
     @POST("/rest/server.api")
