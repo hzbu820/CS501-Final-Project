@@ -247,7 +247,6 @@ class RecipeViewModel(application: Application) : BaseViewModel(application) {
 
         viewModelScope.launch {
             // placeholder
-            //TODO: Actually input label image and url
             val placeholder = SavedRecipe(
                 label = "placeholder recipe",
                 image = "",

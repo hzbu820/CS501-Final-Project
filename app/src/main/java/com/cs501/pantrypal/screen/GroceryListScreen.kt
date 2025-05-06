@@ -253,20 +253,37 @@ fun TabletGroceryLayout(
                     Text("Clear Completed")
                 }
 
-                // Categories header
-                Text(
-                    text = "Categories",
-                    style = Typography.headlineMedium,
-                    modifier = Modifier.padding(vertical = 8.dp)
-                )
+                // Categories header with selected category info
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Categories",
+                        style = Typography.headlineMedium
+                    )
+                    
+                    // Show current filter if any
+                    if (categoryFilter != null) {
+                        Text(
+                            text = "Current: $categoryFilter",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = InfoColor,
+                            modifier = Modifier.padding(start = 8.dp)
+                        )
+                    }
+                }
 
-                // All categories option
+                // All categories option is always visible
                 CategoryItem(
-                    category = "List",
+                    category = "All Items",
                     isSelected = categoryFilter == null,
                     onCategorySelect = { onCategorySelect(null) })
-
-                // Category list
+                
+                // Category list - always visible regardless of current filter
                 LazyColumn(
                     modifier = Modifier.weight(1f)
                 ) {
@@ -289,11 +306,26 @@ fun TabletGroceryLayout(
         ) {
             // Category title if selected
             if (categoryFilter != null) {
-                Text(
-                    text = categoryFilter,
-                    style = Typography.displayMedium,
-                    modifier = Modifier.padding(start = 16.dp, top = 16.dp, bottom = 16.dp)
-                )
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 16.dp, top = 16.dp, bottom = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        painter = painterResource(id = FOOD_IMAGES[categoryFilter] ?: R.drawable.grocery),
+                        contentDescription = categoryFilter,
+                        modifier = Modifier
+                            .size(40.dp)
+                            .padding(end = 16.dp),
+                        tint = Color.Unspecified
+                    )
+                    
+                    Text(
+                        text = categoryFilter,
+                        style = Typography.displayMedium
+                    )
+                }
             }
 
             // Grocery list

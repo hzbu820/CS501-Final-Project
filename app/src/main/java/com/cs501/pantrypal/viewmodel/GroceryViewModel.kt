@@ -78,22 +78,9 @@ class GroceryViewModel(application: Application) : BaseViewModel(application) {
             _uiState.value = _uiState.value.copy(isLoading = true, error = null)
             
             try {
-                // Determine which repository method to use based on filters
-                val flow = when {
-                    _searchQuery.value.isNotBlank() -> {
-                        repository.searchGroceryItems(getCurrentUserId(), _searchQuery.value)
-                    }
-                    _categoryFilter.value != null -> {
-                        repository.getGroceryItemsByCategory(
-                            getCurrentUserId(), 
-                            _categoryFilter.value!!, 
-                            true // Always get all items and filter in-memory
-                        )
-                    }
-                    else -> {
-                        repository.getAllGroceryItemsByUserId(getCurrentUserId())
-                    }
-                }
+                // Always get all items first, regardless of filters
+                // We'll apply filtering in memory for more reliable results
+                val flow = repository.getAllGroceryItemsByUserId(getCurrentUserId())
                 
                 // Collect the latest emissions from the flow
                 flow.catch { e ->
@@ -117,7 +104,8 @@ class GroceryViewModel(application: Application) : BaseViewModel(application) {
                         error = null
                     )
                     
-                    Log.d("GroceryViewModel", "Updated UI with ${sortedItems.size} items")
+                    Log.d("GroceryViewModel", "Updated UI with ${sortedItems.size} filtered items out of ${items.size} total items")
+                    Log.d("GroceryViewModel", "Category: ${_categoryFilter.value}, ShowChecked: ${_showCheckedItems.value}, Search: '${_searchQuery.value}'")
                 }
             } catch (e: Exception) {
                 Log.e("GroceryViewModel", "Error in loadItems: ${e.message}", e)
@@ -133,11 +121,25 @@ class GroceryViewModel(application: Application) : BaseViewModel(application) {
      * Apply filters to the items based on current settings
      */
     private fun applyFilters(items: List<GroceryItem>): List<GroceryItem> {
-        return items.filter { item ->
-            // If "Show completed" is OFF, hide checked items
-            (_showCheckedItems.value || !item.isChecked) &&
-            // Apply category filter if set
-            (_categoryFilter.value == null || item.category == _categoryFilter.value)
+        // Filter items based on search query if provided
+        val searchFiltered = if (_searchQuery.value.isNotBlank()) {
+            items.filter { it.name.contains(_searchQuery.value, ignoreCase = true) }
+        } else {
+            items
+        }
+        
+        // Apply category filtering if needed
+        val categoryFiltered = if (_categoryFilter.value != null) {
+            searchFiltered.filter { it.category == _categoryFilter.value }
+        } else {
+            searchFiltered
+        }
+        
+        // Apply checked items filter
+        return if (!_showCheckedItems.value) {
+            categoryFiltered.filter { !it.isChecked }
+        } else {
+            categoryFiltered
         }
     }
     
@@ -181,19 +183,11 @@ class GroceryViewModel(application: Application) : BaseViewModel(application) {
     fun setCategoryFilter(category: String?) {
         if (_categoryFilter.value == category) return
         
+        Log.d("GroceryViewModel", "Setting category filter to: $category")
         _categoryFilter.value = category
         
-        // If changing to/from a category, reload items
-        // Otherwise just apply filters to existing items
-        if (category != null) {
-            loadItems()
-        } else {
-            val currentItems = _uiState.value.allItems
-            val filteredItems = applyFilters(currentItems)
-            val sortedItems = sortItems(filteredItems)
-            
-            _uiState.value = _uiState.value.copy(displayedItems = sortedItems)
-        }
+        // Always reload items when changing categories
+        loadItems()
     }
     
     /**

@@ -302,11 +302,11 @@ fun TabletRecipeSearchLayout(
 
                                     Text(
                                         text = buildAnnotatedString {
-                                            withStyle(style = SpanStyle(color = Color(0xFF388E3C))) { // ✅ 绿色数字
+                                            withStyle(style = SpanStyle(color = Color(0xFF388E3C))) {
                                                 append(formattedCalories)
                                             }
                                             append(" ")
-                                            withStyle(style = SpanStyle(color = Color.Black)) { // ✅ 黑色单位
+                                            withStyle(style = SpanStyle(color = Color.Black)) { //
                                                 append("calories")
                                             }
                                         },
@@ -340,8 +340,8 @@ fun TabletRecipeSearchLayout(
                                             .fillMaxWidth()
                                             .height(30.dp),// 控制竖向高度更窄
                                         colors = ButtonDefaults.buttonColors(
-                                            containerColor = MaterialTheme.colorScheme.primaryContainer, // 更浅的主题色
-                                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer   // 匹配的文字色
+                                            containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                                         )
 
                                     ) {
@@ -496,11 +496,11 @@ fun PhoneRecipeSearchLayout(
 
                                 Text(
                                     text = buildAnnotatedString {
-                                        withStyle(style = SpanStyle(color = Color(0xFF388E3C))) { // ✅ 绿色数字
+                                        withStyle(style = SpanStyle(color = Color(0xFF388E3C))) {
                                             append(formattedCalories)
                                         }
                                         append(" ")
-                                        withStyle(style = SpanStyle(color = Color.Black)) { // ✅ 黑色单位
+                                        withStyle(style = SpanStyle(color = Color.Black)) {
                                             append("calories")
                                         }
                                     },
@@ -526,8 +526,8 @@ fun PhoneRecipeSearchLayout(
                                     },
                                     modifier = Modifier.fillMaxWidth(),
                                     colors = ButtonDefaults.buttonColors(
-                                        containerColor = MaterialTheme.colorScheme.primaryContainer, // 更浅的主题色
-                                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer   // 匹配的文字色
+                                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                                     )
 
                                 ) {
