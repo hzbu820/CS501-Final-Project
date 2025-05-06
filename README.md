@@ -354,9 +354,7 @@ app/
 
 ### Clean Architecture Implementation
 
-Our application follows Robert C. Martin's Clean Architecture principles, organized into concentric layers:
-
-1. **Entity Layer (Innermost):**
+1. **Entity Layer :**
    - Pure Kotlin data classes representing core business objects
    - No dependencies on any framework or library
    - Example: `Recipe`, `Ingredient`, `User`
