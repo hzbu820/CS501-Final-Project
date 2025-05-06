@@ -15,7 +15,7 @@ data class Recipe(
     val ingredientLines: List<String>,
     val uri: String,
     val calories: Double,
-    val yield: Double,                   // ✅ 份量数
-    val totalTime: Double,              // ✅ 所需时间
-    val cuisineType: List<String>,      // ✅ 菜系类型
+    val yield: Double,
+    val totalTime: Double,
+    val cuisineType: List<String>,
 )
