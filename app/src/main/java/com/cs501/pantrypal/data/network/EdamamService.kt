@@ -13,6 +13,6 @@ interface EdamamService {
         @Query("type") type: String = "public",
         @Query("q") ingredients: String,
         @Query("app_id") appId: String = "e5544b43",
-        @Query("app_key") appKey: String = "c1449006ec0d6009a0f969caaf890c60"
+        @Query("app_key") appKey: String = "bdbe86cbc86014789a049104c6ed1759"
     ): RecipeResponse
 }

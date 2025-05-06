@@ -13,5 +13,9 @@ data class Recipe(
     val label: String,
     val image: String,
     val ingredientLines: List<String>,
-    val uri: String
+    val uri: String,
+    val calories: Double,
+    val yield: Double,
+    val totalTime: Double,
+    val cuisineType: List<String>,
 )
