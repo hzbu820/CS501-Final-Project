@@ -1,5 +1,6 @@
 package com.cs501.pantrypal.data.network
 
+import com.cs501.pantrypal.BuildConfig
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -13,8 +14,8 @@ object ApiClient {
             .create(ApiService::class.java)
     }
 
-    private const val CONSUMER_KEY = "53dc5b744d2f4529819771be9264d6a6"
-    private const val CONSUMER_SECRET = "4d814772fae44199a4a077fc19294997"
+    private const val CONSUMER_KEY = BuildConfig.FATSECRET_KEY
+    private const val CONSUMER_SECRET = BuildConfig.FATSECRET_SECRET
     
     val foodRetrofit: ApiService by lazy {
         val client = OkHttpClient.Builder()
